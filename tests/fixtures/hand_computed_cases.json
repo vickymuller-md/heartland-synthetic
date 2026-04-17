@@ -1,0 +1,138 @@
+[
+  {
+    "name": "all_zero",
+    "row": {
+      "age": 60,
+      "prior_hf_hosp_6mo": 0,
+      "egfr": 80,
+      "bnp": 100,
+      "sbp": 130,
+      "diabetes": 0,
+      "lvef": 55,
+      "ckm_stage": 1,
+      "distance_to_cardiology_mi": 10,
+      "social_support_score": 30
+    },
+    "expected_score": 0,
+    "expected_tier": "low"
+  },
+  {
+    "name": "isolated_age_over_75",
+    "row": {
+      "age": 76,
+      "prior_hf_hosp_6mo": 0,
+      "egfr": 80,
+      "bnp": 100,
+      "sbp": 130,
+      "diabetes": 0,
+      "lvef": 55,
+      "ckm_stage": 1,
+      "distance_to_cardiology_mi": 10,
+      "social_support_score": 30
+    },
+    "expected_score": 2,
+    "expected_tier": "low"
+  },
+  {
+    "name": "boundary_low_to_moderate",
+    "row": {
+      "age": 76,
+      "prior_hf_hosp_6mo": 0,
+      "egfr": 40,
+      "bnp": 100,
+      "sbp": 130,
+      "diabetes": 0,
+      "lvef": 55,
+      "ckm_stage": 1,
+      "distance_to_cardiology_mi": 10,
+      "social_support_score": 30
+    },
+    "expected_score": 4,
+    "expected_tier": "low"
+  },
+  {
+    "name": "just_crossed_moderate",
+    "row": {
+      "age": 76,
+      "prior_hf_hosp_6mo": 0,
+      "egfr": 40,
+      "bnp": 100,
+      "sbp": 130,
+      "diabetes": 1,
+      "lvef": 55,
+      "ckm_stage": 1,
+      "distance_to_cardiology_mi": 10,
+      "social_support_score": 30
+    },
+    "expected_score": 5,
+    "expected_tier": "moderate"
+  },
+  {
+    "name": "boundary_moderate_to_high",
+    "row": {
+      "age": 76,
+      "prior_hf_hosp_6mo": 0,
+      "egfr": 40,
+      "bnp": 600,
+      "sbp": 95,
+      "diabetes": 0,
+      "lvef": 55,
+      "ckm_stage": 1,
+      "distance_to_cardiology_mi": 10,
+      "social_support_score": 30
+    },
+    "expected_score": 8,
+    "expected_tier": "moderate"
+  },
+  {
+    "name": "classic_high_risk",
+    "row": {
+      "age": 80,
+      "prior_hf_hosp_6mo": 1,
+      "egfr": 35,
+      "bnp": 800,
+      "sbp": 95,
+      "diabetes": 1,
+      "lvef": 25,
+      "ckm_stage": 3,
+      "distance_to_cardiology_mi": 60,
+      "social_support_score": 14
+    },
+    "expected_score": 18,
+    "expected_tier": "high"
+  },
+  {
+    "name": "rural_only_contribution",
+    "row": {
+      "age": 60,
+      "prior_hf_hosp_6mo": 0,
+      "egfr": 80,
+      "bnp": 100,
+      "sbp": 130,
+      "diabetes": 0,
+      "lvef": 55,
+      "ckm_stage": 1,
+      "distance_to_cardiology_mi": 75,
+      "social_support_score": 14
+    },
+    "expected_score": 2,
+    "expected_tier": "low"
+  },
+  {
+    "name": "ckm_stage_4_trigger",
+    "row": {
+      "age": 60,
+      "prior_hf_hosp_6mo": 0,
+      "egfr": 80,
+      "bnp": 100,
+      "sbp": 130,
+      "diabetes": 0,
+      "lvef": 55,
+      "ckm_stage": 4,
+      "distance_to_cardiology_mi": 10,
+      "social_support_score": 30
+    },
+    "expected_score": 2,
+    "expected_tier": "low"
+  }
+]

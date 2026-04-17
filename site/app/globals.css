@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+@theme inline {
+    --font-heading: var(--font-sans);
+    --font-sans: var(--font-sans);
+    --font-display: var(--font-display);
+    --font-editorial: var(--font-editorial);
+    --font-mono-editorial: var(--font-mono-editorial);
+    --color-terminal: #faf6ee;
+    --color-terminal-deep: #f2ecde;
+    --color-panel: #ffffff;
+    --color-panel-hi: #efe9dd;
+    --color-grid: #e3dcd0;
+    --color-grid-hi: #c5bcac;
+    --color-cool: #0f2544;
+    --color-stone: #7a8593;
+    --color-signal: #2e6f5e;
+    --color-signal-deep: #1e4e41;
+    --color-alert: #ff6b55;
+    --color-alert-deep: #e04a35;
+    --color-critical: #d63a20;
+    --radius-sm: calc(var(--radius) * 0.6);
+    --radius-md: calc(var(--radius) * 0.8);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) * 1.4);
+    --radius-2xl: calc(var(--radius) * 1.8);
+    --radius-3xl: calc(var(--radius) * 2.2);
+    --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+    --radius: 0.625rem;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans), system-ui, sans-serif;
+  }
+  body {
+    background-color: var(--color-terminal);
+    color: var(--color-cool);
+  }
+}
