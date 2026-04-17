@@ -55,7 +55,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geist.variable} ${sora.variable} ${instrumentSerif.variable} ${soraMono.variable} bg-terminal text-cool antialiased`}
+        className={`${geist.variable} ${sora.variable} ${instrumentSerif.variable} ${soraMono.variable} min-h-screen flex flex-col bg-terminal font-editorial text-cool antialiased selection:bg-alert/40 selection:text-cool`}
       >
         {children}
       </body>
