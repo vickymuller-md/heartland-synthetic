@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Sora, Instrument_Serif } from "next/font/google";
+import "@heartland/ui/css/theme.css";
 import "./globals.css";
 
 const geist = Geist({
