@@ -36,6 +36,9 @@ export const metadata: Metadata = {
   description:
     "Python package that generates clinically-realistic synthetic heart-failure patient cohorts including the 10 HEARTLAND risk variables — distance-to-cardiology and social support — that Synthea does not model.",
   metadataBase: new URL("https://synthetic.heartlandprotocol.org"),
+  verification: {
+    google: "KRMDAqi7exo5408R8MNrs3LGbdxohMbX-p7tEtaACCg",
+  },
   openGraph: {
     title: "heartland-synthetic",
     description:
