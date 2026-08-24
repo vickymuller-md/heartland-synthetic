@@ -36,4 +36,4 @@ __all__ = [
     "RISK_VARIABLES",
 ]
 
-__version__ = "0.2.0"
+__version__ = "0.2.2"

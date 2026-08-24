@@ -1,10 +1,10 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling==1.27.0"]
 build-backend = "hatchling.build"
 
 [project]
 name = "heartland-synthetic"
-version = "0.2.0"
+version = "0.2.2"
 description = "Synthetic heart-failure cohort generator with HEARTLAND risk variables (rural distance, social support) that Synthea does not model."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -51,6 +51,10 @@ publish = [
 [project.urls]
 Homepage = "https://github.com/vickymuller-md/heartland-synthetic"
 Repository = "https://github.com/vickymuller-md/heartland-synthetic"
+Documentation = "https://synthetic.heartlandprotocol.org"
+Changelog = "https://github.com/vickymuller-md/heartland-synthetic/blob/main/CHANGELOG.md"
+Issues = "https://github.com/vickymuller-md/heartland-synthetic/issues"
+DOI = "https://doi.org/10.5281/zenodo.19635042"
 Protocol = "https://doi.org/10.5281/zenodo.18566403"
 
 [tool.hatch.build.targets.wheel]

@@ -4,6 +4,21 @@ All notable changes to `heartland-synthetic` are documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 versions follow [SemVer](https://semver.org/).
 
+## [0.2.2] - 2026-08-24
+
+### Fixed
+- Corrected package metadata for the first PyPI publication. The earlier
+  GitHub/Zenodo `v0.2.1` bootstrap release retained `0.2.0` in
+  `pyproject.toml` and `heartland_synthetic.__version__`.
+- Replaced the pending citation placeholder with the canonical Zenodo concept
+  DOI and added persistent project links to the package metadata.
+- Pinned Hatchling 1.27.0 so release artifacts use Core Metadata 2.4 and pass
+  the current Twine metadata validator.
+
+### Added
+- Tokenless PyPI release workflow using GitHub Actions Trusted Publishing,
+  separate build and publish jobs, metadata validation, and attestations.
+
 ## [0.2.0] - 2026-04-16
 
 ### Added

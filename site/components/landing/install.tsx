@@ -51,12 +51,12 @@ export function Install() {
               <p>
                 <span className="text-stone">Cite:</span>{" "}
                 <a
-                  href="https://doi.org/10.5281/zenodo.18566403"
+                  href="https://doi.org/10.5281/zenodo.19635042"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="underline decoration-dotted underline-offset-4 hover:text-alert"
                 >
-                  Zenodo DOI (pending first release)
+                  Zenodo software DOI
                 </a>
               </p>
             </div>

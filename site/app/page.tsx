@@ -10,7 +10,7 @@ export default function Home() {
     <>
       <Masthead
         currentSite="synthetic"
-        version="v0.2.0"
+        version="v0.2.2"
         navItems={[
           { label: "Features", href: "#features" },
           { label: "Install", href: "#install" },
@@ -35,7 +35,7 @@ export default function Home() {
       </main>
       <Colophon
         currentSite="synthetic"
-        version="v0.2.0"
+        version="v0.2.2"
         description="Python package that generates clinically-realistic synthetic heart-failure patient cohorts including the 10 HEARTLAND risk variables — distance-to-cardiology and social support — that Synthea does not model."
         extraBlocks={[
           {

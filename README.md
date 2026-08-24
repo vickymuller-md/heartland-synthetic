@@ -5,6 +5,7 @@
 do not model.**
 
 [![CI](https://github.com/vickymuller-md/heartland-synthetic/actions/workflows/ci.yml/badge.svg)](https://github.com/vickymuller-md/heartland-synthetic/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/heartland-synthetic.svg)](https://pypi.org/project/heartland-synthetic/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 
@@ -239,8 +240,8 @@ assert generate_cohort(cfg).equals(generate_cohort(cfg))
   title  = {heartland-synthetic: Synthetic heart-failure cohort generator with HEARTLAND risk variables},
   year   = {2026},
   publisher = {Zenodo},
-  doi    = {10.5281/zenodo.PENDING},
-  url    = {https://github.com/vickymuller-md/heartland-synthetic}
+  doi    = {10.5281/zenodo.19635042},
+  url    = {https://doi.org/10.5281/zenodo.19635042}
 }
 ```
 
