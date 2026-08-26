@@ -44,6 +44,7 @@ export default function Home() {
               { label: "PyPI", href: "https://pypi.org/project/heartland-synthetic/", external: true },
               { label: "GitHub", href: "https://github.com/vickymuller-md/heartland-synthetic", external: true },
               { label: "Changelog", href: "https://github.com/vickymuller-md/heartland-synthetic/blob/main/CHANGELOG.md", external: true },
+              { label: "Software Heritage", href: "https://archive.softwareheritage.org/swh:1:snp:53d48ef3e36293ebabf274cb8db4b35cb55a30d7/", external: true },
             ],
           },
         ]}

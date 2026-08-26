@@ -274,6 +274,7 @@ export default function DatasetPage() {
               { label: "Download CSV", href: DOWNLOAD_PATH, external: false },
               { label: "Generator DOI", href: GENERATOR_DOI, external: true },
               { label: "GitHub release", href: RELEASE_URL, external: true },
+              { label: "Software Heritage", href: "https://archive.softwareheritage.org/swh:1:snp:53d48ef3e36293ebabf274cb8db4b35cb55a30d7/", external: true },
             ],
           },
         ]}

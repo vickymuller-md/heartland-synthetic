@@ -248,6 +248,12 @@ assert generate_cohort(cfg).equals(generate_cohort(cfg))
 Cite alongside the HEARTLAND Protocol:
 Muller Ferreira V. *HEARTLAND Protocol v3.3.* Zenodo. DOI 10.5281/zenodo.18566403.
 
+## Software preservation
+
+Software Heritage snapshot (archived 2026-08-25): [`swh:1:snp:53d48ef3e36293ebabf274cb8db4b35cb55a30d7`](https://archive.softwareheritage.org/swh:1:snp:53d48ef3e36293ebabf274cb8db4b35cb55a30d7/)
+
+This persistent SWHID identifies the repository snapshot captured on that date; archival does not imply endorsement or validation.
+
 ## License
 
 MIT. See [LICENSE](LICENSE).
