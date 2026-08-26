@@ -5,10 +5,14 @@ const SITE_URL = "https://synthetic.heartlandprotocol.org";
 const DATASET_URL = `${SITE_URL}/dataset`;
 const DOWNLOAD_PATH = "/data/heartland-synthetic-cohort-1000-seed42.csv";
 const DOWNLOAD_URL = `${SITE_URL}${DOWNLOAD_PATH}`;
-const GENERATOR_DOI = "https://doi.org/10.5281/zenodo.19635043";
-const CONCEPT_DOI = "https://doi.org/10.5281/zenodo.19635042";
+const GENERATOR_VERSION_DOI = "https://doi.org/10.5281/zenodo.22086443";
+const GENERATOR_CONCEPT_DOI = "https://doi.org/10.5281/zenodo.19635042";
+const PROTOCOL_DOI = "https://doi.org/10.5281/zenodo.19101219";
+const PYPI_URL = "https://pypi.org/project/heartland-synthetic/0.2.2/";
+const HUGGING_FACE_URL =
+  "https://huggingface.co/datasets/vickymuller-md/heartland-synthetic";
 const RELEASE_URL =
-  "https://github.com/vickymuller-md/heartland-synthetic/releases/tag/v0.2.1";
+  "https://github.com/vickymuller-md/heartland-synthetic/releases/tag/v0.2.2";
 
 export const metadata: Metadata = {
   title: "HEARTLAND Synthetic HF Benchmark Cohort",
@@ -37,14 +41,14 @@ const datasetStructuredData = {
   mainEntityOfPage: DATASET_URL,
   version: "1.0.0",
   datePublished: "2026-08-23",
-  dateModified: "2026-08-23",
+  dateModified: "2026-08-26",
   inLanguage: "en",
   isAccessibleForFree: true,
   conditionsOfAccess:
     "Open access for research, education, reproducibility, and software testing. Not intended for clinical decision-making or patient care.",
   license: "https://opensource.org/license/mit",
   identifier: `${DATASET_URL}#dataset`,
-  sameAs: [GENERATOR_DOI, CONCEPT_DOI, RELEASE_URL],
+  sameAs: [HUGGING_FACE_URL],
   keywords: [
     "synthetic health data",
     "heart failure",
@@ -86,11 +90,8 @@ const datasetStructuredData = {
     "HEARTLAND risk score and tier",
     "Modeled one-year mortality and hospitalization outcomes",
   ],
-  isBasedOn: [GENERATOR_DOI, RELEASE_URL],
-  citation: [
-    GENERATOR_DOI,
-    "https://doi.org/10.5281/zenodo.18566403",
-  ],
+  isBasedOn: [GENERATOR_VERSION_DOI, RELEASE_URL, PYPI_URL],
+  citation: [GENERATOR_CONCEPT_DOI, PROTOCOL_DOI],
   distribution: [
     {
       "@type": "DataDownload",
@@ -111,7 +112,7 @@ const configuration = [
   ["Modeled rural fraction", "70%"],
   ["Age range", "45–95 years"],
   ["HF phenotype mix", "45% HFrEF · 15% HFmrEF · 40% HFpEF"],
-  ["Generator archive", "heartland-synthetic v0.2.1"],
+  ["Generator archive", "heartland-synthetic v0.2.2"],
 ] as const;
 
 export default function DatasetPage() {
@@ -135,7 +136,7 @@ export default function DatasetPage() {
         ]}
         secondaryCta={{
           label: "Zenodo",
-          href: GENERATOR_DOI,
+          href: GENERATOR_VERSION_DOI,
           external: true,
         }}
         cta={{
@@ -173,12 +174,12 @@ export default function DatasetPage() {
                 Download CSV · 108 KB
               </a>
               <a
-                href={GENERATOR_DOI}
+                href={GENERATOR_VERSION_DOI}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="rounded-full border border-grid bg-panel px-6 py-3 font-editorial text-[14px] font-medium text-cool transition-colors hover:border-cool/40"
               >
-                Generator DOI ↗
+                Generator v0.2.2 DOI ↗
               </a>
             </div>
           </div>
@@ -232,10 +233,11 @@ export default function DatasetPage() {
             </h2>
             <div className="mt-6 grid gap-6 font-editorial text-[14.5px] leading-relaxed text-cool/75 md:grid-cols-2">
               <p>
-                Generated from the archived heartland-synthetic release using a
-                fixed seed and configuration shown above. The Zenodo DOI identifies
-                the generator archive; it is cited as provenance and is not
-                presented as a DOI minted specifically for this CSV.
+                Reproducible with the archived heartland-synthetic v0.2.2
+                release using the fixed seed and configuration shown above. The
+                Zenodo DOI identifies the generator archive; it is cited as
+                provenance and is not presented as a DOI minted specifically for
+                this CSV.
               </p>
               <p>
                 SHA-256: <code className="break-all font-mono text-[12px] text-cool">8fbce909272274129f94db2b80b179b493e64fbc382a88515a851089b2edda8e</code>
@@ -272,7 +274,9 @@ export default function DatasetPage() {
             title: "Dataset",
             links: [
               { label: "Download CSV", href: DOWNLOAD_PATH, external: false },
-              { label: "Generator DOI", href: GENERATOR_DOI, external: true },
+              { label: "Generator DOI", href: GENERATOR_VERSION_DOI, external: true },
+              { label: "PyPI v0.2.2", href: PYPI_URL, external: true },
+              { label: "Hugging Face", href: HUGGING_FACE_URL, external: true },
               { label: "GitHub release", href: RELEASE_URL, external: true },
               { label: "Software Heritage", href: "https://archive.softwareheritage.org/swh:1:snp:53d48ef3e36293ebabf274cb8db4b35cb55a30d7/", external: true },
             ],

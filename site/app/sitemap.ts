@@ -14,7 +14,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${SITE_URL}/dataset`,
-      lastModified: new Date("2026-08-23T00:00:00Z"),
+      lastModified: new Date("2026-08-26T00:00:00Z"),
       changeFrequency: "yearly",
       priority: 0.9,
     },

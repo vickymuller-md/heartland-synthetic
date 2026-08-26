@@ -55,7 +55,7 @@ Documentation = "https://synthetic.heartlandprotocol.org"
 Changelog = "https://github.com/vickymuller-md/heartland-synthetic/blob/main/CHANGELOG.md"
 Issues = "https://github.com/vickymuller-md/heartland-synthetic/issues"
 DOI = "https://doi.org/10.5281/zenodo.19635042"
-Protocol = "https://doi.org/10.5281/zenodo.18566403"
+Protocol = "https://doi.org/10.5281/zenodo.19101219"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/heartland_synthetic"]

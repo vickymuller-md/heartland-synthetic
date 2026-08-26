@@ -6,6 +6,7 @@ do not model.**
 
 [![CI](https://github.com/vickymuller-md/heartland-synthetic/actions/workflows/ci.yml/badge.svg)](https://github.com/vickymuller-md/heartland-synthetic/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/heartland-synthetic.svg)](https://pypi.org/project/heartland-synthetic/)
+[![Dataset on Hugging Face](https://img.shields.io/badge/dataset-Hugging%20Face-FFD21E.svg)](https://huggingface.co/datasets/vickymuller-md/heartland-synthetic)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 
@@ -232,6 +233,14 @@ assert generate_cohort(cfg).equals(generate_cohort(cfg))
   generated — no labs beyond BNP, eGFR, and BMI; no ECG, echo structural
   parameters, or NYHA class.
 
+## Benchmark dataset
+
+The public 1,000-row, seed-42 benchmark cohort is available from the
+[dataset landing page](https://synthetic.heartlandprotocol.org/dataset/) and
+[Hugging Face](https://huggingface.co/datasets/vickymuller-md/heartland-synthetic).
+It is reproducible with heartland-synthetic v0.2.2 and contains no real patient
+data or protected health information.
+
 ## Citation
 
 ```bibtex
@@ -246,7 +255,7 @@ assert generate_cohort(cfg).equals(generate_cohort(cfg))
 ```
 
 Cite alongside the HEARTLAND Protocol:
-Muller Ferreira V. *HEARTLAND Protocol v3.3.* Zenodo. DOI 10.5281/zenodo.18566403.
+Muller Ferreira V. *HEARTLAND Protocol v3.3.* Zenodo. DOI 10.5281/zenodo.19101219.
 
 ## Software preservation
 
