@@ -269,6 +269,7 @@ export default function DatasetPage() {
         currentSite="synthetic"
         version="dataset v1.0.0"
         description="Open, reproducible synthetic heart-failure benchmark cohort. No real patient data or PHI."
+        legal="Built by Vicky Muller Ferreira, MD. For research and educational use only. Synthetic data; no PHI. Not a medical device. Not for clinical decision-making or direct patient care."
         extraBlocks={[
           {
             title: "Dataset",
