@@ -7,6 +7,7 @@ const DOWNLOAD_PATH = "/data/heartland-synthetic-cohort-1000-seed42.csv";
 const DOWNLOAD_URL = `${SITE_URL}${DOWNLOAD_PATH}`;
 const GENERATOR_VERSION_DOI = "https://doi.org/10.5281/zenodo.22086443";
 const GENERATOR_CONCEPT_DOI = "https://doi.org/10.5281/zenodo.19635042";
+const TECHNICAL_REPORT_DOI = "https://doi.org/10.5281/zenodo.22137199";
 const PROTOCOL_DOI = "https://doi.org/10.5281/zenodo.19101219";
 const PYPI_URL = "https://pypi.org/project/heartland-synthetic/0.2.2/";
 const HUGGING_FACE_URL =
@@ -91,7 +92,7 @@ const datasetStructuredData = {
     "Modeled one-year mortality and hospitalization outcomes",
   ],
   isBasedOn: [GENERATOR_VERSION_DOI, RELEASE_URL, PYPI_URL],
-  citation: [GENERATOR_CONCEPT_DOI, PROTOCOL_DOI],
+  citation: [GENERATOR_CONCEPT_DOI, TECHNICAL_REPORT_DOI, PROTOCOL_DOI],
   distribution: [
     {
       "@type": "DataDownload",
@@ -180,6 +181,14 @@ export default function DatasetPage() {
                 className="rounded-full border border-grid bg-panel px-6 py-3 font-editorial text-[14px] font-medium text-cool transition-colors hover:border-cool/40"
               >
                 Generator v0.2.2 DOI ↗
+              </a>
+              <a
+                href={TECHNICAL_REPORT_DOI}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-full border border-grid bg-panel px-6 py-3 font-editorial text-[14px] font-medium text-cool transition-colors hover:border-cool/40"
+              >
+                Technical report DOI ↗
               </a>
             </div>
           </div>
@@ -276,6 +285,7 @@ export default function DatasetPage() {
             links: [
               { label: "Download CSV", href: DOWNLOAD_PATH, external: false },
               { label: "Generator DOI", href: GENERATOR_VERSION_DOI, external: true },
+              { label: "Technical report", href: TECHNICAL_REPORT_DOI, external: true },
               { label: "PyPI v0.2.2", href: PYPI_URL, external: true },
               { label: "Hugging Face", href: HUGGING_FACE_URL, external: true },
               { label: "GitHub release", href: RELEASE_URL, external: true },

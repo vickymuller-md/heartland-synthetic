@@ -243,6 +243,8 @@ data or protected health information.
 
 ## Citation
 
+Software:
+
 ```bibtex
 @software{mullerferreira_heartland_synthetic_2026,
   author = {Muller Ferreira, Vicky},
@@ -253,6 +255,22 @@ data or protected health information.
   url    = {https://doi.org/10.5281/zenodo.19635042}
 }
 ```
+
+Technical report:
+
+```bibtex
+@techreport{mullerferreira_heartland_synthetic_report_2026,
+  author = {Muller Ferreira, Vicky},
+  title  = {heartland-synthetic: A Reproducible Generator and Benchmark Dataset for Rural Heart-Failure Research Workflows},
+  year   = {2026},
+  institution = {Zenodo},
+  doi    = {10.5281/zenodo.22137199},
+  url    = {https://doi.org/10.5281/zenodo.22137199}
+}
+```
+
+The report concept DOI resolves to all versions. Version 1.0 is archived at
+[10.5281/zenodo.22137200](https://doi.org/10.5281/zenodo.22137200).
 
 Cite alongside the HEARTLAND Protocol:
 Muller Ferreira V. *HEARTLAND Protocol v3.3.* Zenodo. DOI 10.5281/zenodo.19101219.
