@@ -4,6 +4,52 @@ All notable changes to `heartland-synthetic` are documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 versions follow [SemVer](https://semver.org/).
 
+## [0.3.0] - 2026-09-17
+
+### Changed
+- `export_fhir_bundle`: `Patient.address` no longer writes the synthetic
+  county code to `postalCode`. The code is carried in an `Address` extension
+  (`https://fhir.heartlandprotocol.org/StructureDefinition/heartland-synthetic-county-code`)
+  whose system URI marks it as synthetic. `Address.district` stays absent —
+  no county name is generated.
+- `export_fhir_bundle`: race and ethnicity are emitted as the two separate
+  US Core 6.1 extensions, with `ombCategory` restricted to the required value
+  sets. `Hispanic` maps to ethnicity `2135-2` with race `UNK`; `Other` maps to
+  `UNK` on both axes instead of the out-of-value-set `2131-1`. Both extensions
+  carry the mandatory `text` element. Previously a single race extension
+  carried `2135-2` / `2131-1` and no ethnicity extension was emitted.
+- `export_fhir_bundle`: HEARTLAND canonicals moved from
+  `http://heartlandprotocol.org/fhir/CodeSystem/risk-score` to the IG canonical
+  base, `https://fhir.heartlandprotocol.org/CodeSystem/heartland-risk-score`.
+- `export_fhir_bundle`: the score `Observation` tier component is now a coded
+  `valueCodeableConcept` from
+  `https://fhir.heartlandprotocol.org/CodeSystem/heartland-risk-tier` instead
+  of a free `valueString`.
+- README and the site feature card no longer describe the REDCap export as
+  "ready to import": it writes its own single-form instrument, not an import
+  file for the HEARTLAND REDCap Instrument Template.
+
+### Added
+- `export_fhir_bundle`: a `RiskAssessment` per patient carrying the tier as
+  `prediction.qualitativeRisk`, with the score `Observation` as `basis`.
+  `prediction.probabilityDecimal` is deliberately left empty — the 0-18
+  HEARTLAND total is a point count, not a likelihood. No resource declares
+  `meta.profile`; the Bundles have not been validated against US Core 6.1 or
+  the HEARTLAND IG.
+- `docs/redcap_template_crosswalk.md` — field-level crosswalk between the
+  cohort columns and the 75-field HEARTLAND REDCap Instrument Template, with
+  missingness rules and the resulting coverage.
+- 16 exporter tests: postalCode/district absence, synthetic county system,
+  race/ethnicity value-set membership and `text` cardinality, per-level race
+  mapping, unknown-level degradation to `UNK`, RiskAssessment shape, absence
+  of `probabilityDecimal` and of `meta.profile`, HEARTLAND canonical prefix,
+  and a static guard on the REDCap field-name boundary.
+
+### Unchanged
+- The generator is untouched: no column was added, renamed or recalibrated,
+  and no seed changed. The public 1,000-row, seed-42 benchmark cohort and its
+  published CSV are byte-identical; only the shape of the FHIR export changed.
+
 ## [0.2.2] - 2026-08-24
 
 ### Fixed
