@@ -37,7 +37,7 @@ export function Masthead() {
             The App
           </a>
           <a
-            href="https://doi.org/10.5281/zenodo.18566403"
+            href="https://doi.org/10.5281/zenodo.19101219"
             target="_blank"
             rel="noopener noreferrer"
             className="transition-colors hover:text-alert"
