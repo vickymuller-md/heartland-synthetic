@@ -1,4 +1,13 @@
-"""REDCap export: data CSV + data-dictionary CSV."""
+"""REDCap export: data CSV + data-dictionary CSV.
+
+The output is a **standalone** single-form instrument (``heartland_cohort``)
+whose data dictionary is generated from the cohort columns, in the official
+18-column REDCap data dictionary layout. It is *not* an import file for the
+HEARTLAND REDCap Instrument Template (https://github.com/vickymuller-md/redcap-template),
+a separate 75-field, 5-form instrument using ``bl_*`` / ``gdmt_*`` / ``mo_*`` /
+``out_*`` field names. A field-level crosswalk between the two is in
+``docs/redcap_template_crosswalk.md``; no direct-import adapter is provided.
+"""
 
 from __future__ import annotations
 
@@ -92,7 +101,11 @@ def export_redcap(
     df: pd.DataFrame,
     out_prefix: str | Path,
 ) -> tuple[Path, Path]:
-    """Write REDCap data + data-dictionary CSVs.
+    """Write REDCap data + data-dictionary CSVs for a standalone instrument.
+
+    The pair imports into a new, empty REDCap project (Project Setup -> Upload
+    Data Dictionary, then Import Data). It is not an import file for the
+    HEARTLAND REDCap Instrument Template — see the module docstring.
 
     The output data CSV renames ``patient_id`` to ``record_id`` (REDCap
     requires the first column to be ``record_id``).

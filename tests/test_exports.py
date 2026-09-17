@@ -14,6 +14,7 @@ from heartland_synthetic import (
     export_redcap,
     generate_cohort,
 )
+from heartland_synthetic.exports.redcap import REDCAP_DD_HEADER
 
 # US Core 6.1 required value sets (omb-race-category / omb-ethnicity-category),
 # each including the NullFlavor subset UNK / ASKU.
@@ -32,6 +33,42 @@ SYNTHETIC_COUNTY_EXT = (
 SYNTHETIC_COUNTY_SYSTEM = (
     "https://fhir.heartlandprotocol.org/sid/synthetic-county-code"
 )
+
+
+# Frozen copy of the 75 field names of the HEARTLAND REDCap Instrument Template
+# (vickymuller-md/redcap-template, instruments/heartland_data_dictionary.csv).
+# Kept here so the guard below runs without that repository checked out.
+TEMPLATE_FIELD_NAMES = {
+    "record_id", "enr_date", "consent_date", "facility_name", "facility_cah",
+    "facility_tier", "state", "county_fips", "rural_urban", "age", "sex",
+    "race", "ethnicity", "bl_prior_hf_hosp_6mo", "bl_lvef_pct",
+    "bl_lvef_category", "bl_egfr", "bl_np_type", "bl_np_value",
+    "bl_sbp_admit", "bl_diabetes", "bl_ckm_stage", "bl_distance_cardio_mi",
+    "bl_social_support_limited", "bl_enrichd_score", "bl_risk_score",
+    "bl_risk_tier", "bl_pro_consent", "gdmt_arni_acei_arb_drug",
+    "gdmt_arni_acei_arb_dose", "gdmt_arni_acei_arb_target",
+    "gdmt_arni_acei_arb_start", "gdmt_bb_drug", "gdmt_bb_dose",
+    "gdmt_bb_target", "gdmt_bb_start", "gdmt_mra_drug", "gdmt_mra_dose",
+    "gdmt_mra_target", "gdmt_mra_start", "gdmt_sglt2_drug", "gdmt_sglt2_dose",
+    "gdmt_sglt2_start", "gdmt_hfpef_glp1", "gdmt_classes_count",
+    "gdmt_generic_bridge", "gdmt_init_tier", "mo_event_number", "mo_date",
+    "mo_track", "mo_weight_lb", "mo_sbp", "mo_dbp", "mo_hr", "mo_spo2",
+    "mo_egfr", "mo_k", "mo_bnp", "mo_gdmt_change", "mo_gdmt_change_notes",
+    "mo_red_flag_count", "mo_red_flag_types", "mo_hosp_any", "mo_hosp_hf",
+    "mo_ed_any", "mo_ed_hf", "mo_kccq12_score", "out_vital_status",
+    "out_death_date", "out_death_cardiovascular", "out_hf_hosp_count",
+    "out_hf_ed_count", "out_days_alive_oh", "out_gdmt_optimized",
+    "out_kccq12_12mo",
+}
+# The only names the standalone instrument shares with the Template. A shared
+# name is never a compatibility claim: `sex` and `race` share a name but not a
+# coding (exporter: F/M and a 4-level mixed race/ethnicity radio; Template:
+# 1/2/3 and a 7-category checkbox plus a separate `ethnicity` field), and
+# `gdmt_classes_count` is stored data here but a `calc` field in the Template.
+TEMPLATE_SHARED_FIELDS = {
+    "record_id", "state", "county_fips", "age", "sex", "race",
+    "gdmt_classes_count",
+}
 
 
 @pytest.fixture(scope="module")
@@ -335,3 +372,34 @@ def _heartland_urls(node, found=None) -> list[str]:
     elif isinstance(node, str) and "heartlandprotocol.org" in node:
         found.append(node)
     return found
+
+
+# ---------------------------------------------------------------------------
+# REDCap — instrument boundary guards
+# ---------------------------------------------------------------------------
+def test_dd_header_matches_official_layout():
+    """Regression guard on the official 18-column data dictionary layout."""
+    assert len(REDCAP_DD_HEADER) == 18
+    assert REDCAP_DD_HEADER[0] == "Variable / Field Name"
+    assert REDCAP_DD_HEADER[-1] == "Field Annotation"
+
+
+def test_exported_field_names_disjoint_from_template(
+    tmp_path, cohort_for_exports
+):
+    """Static guard: this is a standalone instrument, not the HEARTLAND Template.
+
+    The Template uses bl_* / gdmt_* / mo_* / out_* names. If exported fields are
+    ever renamed to look Template-compatible, this breaks and forces an explicit
+    decision instead of an implicit interoperability claim.
+    """
+    data, dd = export_redcap(cohort_for_exports, tmp_path / "cohort")
+    columns = set(pd.read_csv(data).columns)
+    dict_fields = set(pd.read_csv(dd)["Variable / Field Name"])
+
+    assert columns & TEMPLATE_FIELD_NAMES == TEMPLATE_SHARED_FIELDS
+    assert dict_fields & TEMPLATE_FIELD_NAMES == TEMPLATE_SHARED_FIELDS
+    assert not {
+        c for c in columns
+        if c.startswith(("bl_", "mo_", "out_", "enr_", "facility_"))
+    }

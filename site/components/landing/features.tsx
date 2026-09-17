@@ -59,7 +59,7 @@ const FEATURES: Feature[] = [
   },
   {
     title: "REDCap export",
-    body: "Writes a REDCap data CSV + 18-column data dictionary with radio / dropdown / yesno / number validation ready to import.",
+    body: "Writes a REDCap data CSV plus a standalone 18-column data dictionary for a single generated instrument — importable into a new REDCap project. Distinct from the HEARTLAND REDCap Template instrument.",
     icon: <Glyph d="M 4 4 H 16 L 20 8 V 20 H 4 Z M 16 4 V 8 H 20 M 8 13 H 16 M 8 17 H 14" />,
     available: true,
   },

@@ -181,8 +181,20 @@ Writes two files:
   (radio for categoricals, dropdown for coded integers, yesno for booleans,
   text+number validation for continuous vitals).
 
-Import into a fresh REDCap project: *Project Setup -> Upload Data Dictionary*
-then *Import Data*.
+**Standalone instrument.** `export_redcap()` writes a self-contained REDCap
+project: one single-form instrument (`heartland_cohort`) whose data dictionary
+is generated from the cohort columns. It follows the official 18-column REDCap
+data dictionary layout and imports into a **new, empty** REDCap project
+(Project Setup → Upload Data Dictionary, then Import Data).
+
+It is **not** an import file for the
+[HEARTLAND REDCap Instrument Template](https://github.com/vickymuller-md/redcap-template),
+which is a separate 75-field, 5-form instrument using `bl_*` / `gdmt_*` /
+`mo_*` / `out_*` field names. A field-level crosswalk between the two is
+documented in the technical report; a direct-import adapter is not provided.
+
+The crosswalk is reproduced in
+[`docs/redcap_template_crosswalk.md`](docs/redcap_template_crosswalk.md).
 
 ## FHIR R4 export
 
@@ -194,13 +206,27 @@ paths = export_fhir_bundle(df, "outputs/fhir/")
 
 Each collection Bundle contains:
 
-- `Patient` (with US Core Race extension)
+- `Patient` with the US Core 6.1 race and ethnicity extensions as two separate
+  extensions. The cohort carries one 4-level variable that mixes race and
+  ethnicity, so `Hispanic` is written to ethnicity (race `UNK`) and `Other`
+  is written as `UNK` on both axes — neither axis is inferred from the other.
 - `Condition` for HF subtype (ICD-10 I50.2 / I50.3 / I50.4), plus
   diabetes / CKD stage / AF / prior HF hospitalization when present
 - `Observation` for LVEF / eGFR / BNP / SBP / DBP / HR / BMI (LOINC)
 - `MedicationStatement` for each GDMT class the patient is on (RxNorm)
-- `Observation` for the HEARTLAND score and tier under the custom CodeSystem
-  `http://heartlandprotocol.org/fhir/CodeSystem/risk-score`
+- `Observation` for the HEARTLAND score total (0-18 points) under the custom
+  CodeSystem
+  `https://fhir.heartlandprotocol.org/CodeSystem/heartland-risk-score`
+- `RiskAssessment` carrying the tier as a coded `prediction.qualitativeRisk`
+  (`https://fhir.heartlandprotocol.org/CodeSystem/heartland-risk-tier`), with
+  the score `Observation` as `basis`. `prediction.probabilityDecimal` is left
+  empty: the total is a point count, not a likelihood.
+
+`Address` carries `state` and `country` only. The synthetic county code travels
+in an extension whose system URI marks it as synthetic; it is never written to
+`Address.postalCode`. No resource declares `meta.profile`: the Bundles have not
+been validated against US Core 6.1 or the HEARTLAND IG, so they assert no
+profile conformance.
 
 ## Reproducibility
 
@@ -222,7 +248,10 @@ assert generate_cohort(cfg).equals(generate_cohort(cfg))
   MAGGIC survival curves + Manemann 2018 social isolation HR + GWTG-HF
   readmission patterns. No prospective HEARTLAND-scored cohort has been
   outcome-validated yet.
-- **County FIPS codes are synthetic** (not mapped to real counties); the RUCA
+- **County FIPS codes are synthetic and must not be decoded.** They are not
+  ANSI/Census county GEOIDs: the 2-digit prefix is an alphabetical index over
+  the state pool, not a real state FIPS, so a code can collide with the real
+  FIPS of a different state and contradict the `state` column. The RUCA
   assignment and state pool are modeled but not geo-accurate.
 - **CKM staging is simplified** from the AHA 2023 Presidential Advisory
   (stages 0-4 via diabetes / CKD / BMI / age); the full 5-stage model with
