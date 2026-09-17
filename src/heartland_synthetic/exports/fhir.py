@@ -6,7 +6,11 @@ Resources included per patient:
 - Condition (HF type, diabetes, AF, CKD stage, prior HF hospitalization)
 - Observation (LVEF, eGFR, BNP, SBP, DBP, HR, BMI)
 - MedicationStatement (ACEi/ARB/ARNI, beta-blocker, MRA, SGLT2i)
-- Observation (HEARTLAND risk score + tier)
+- Observation (HEARTLAND risk score total, 0-18 points)
+- RiskAssessment (HEARTLAND tier, with the score Observation as ``basis``)
+
+No resource declares ``meta.profile``: the Bundles have not been validated
+against US Core 6.1 or the HEARTLAND IG, so they assert no profile conformance.
 """
 
 from __future__ import annotations
@@ -28,6 +32,61 @@ _UCUM_SYSTEM = "http://unitsofmeasure.org"
 _US_CORE_RACE_EXT = (
     "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
 )
+_US_CORE_ETHNICITY_EXT = (
+    "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity"
+)
+# CDC Race & Ethnicity code system used by both US Core ombCategory slices.
+_OMB_SYSTEM = "urn:oid:2.16.840.1.113883.6.238"
+_NULL_FLAVOR_SYSTEM = "http://terminology.hl7.org/CodeSystem/v3-NullFlavor"
+
+# County codes produced by the generator are synthetic: the 2-digit prefix is an
+# alphabetical index over the state pool, not a real state FIPS, so the code is
+# not an ANSI/Census county GEOID and must never be written to
+# ``Address.postalCode`` (whose normative definition is "postal code", alias
+# Zip). It is carried in an extension whose system URI marks it as synthetic.
+_SYNTHETIC_COUNTY_EXT = (
+    "https://fhir.heartlandprotocol.org/StructureDefinition/"
+    "heartland-synthetic-county-code"
+)
+_SYNTHETIC_COUNTY_SYSTEM = (
+    "https://fhir.heartlandprotocol.org/sid/synthetic-county-code"
+)
+_SYNTHETIC_COUNTY_DISPLAY = (
+    "Synthetic county code (not an ANSI/FIPS county GEOID)"
+)
+
+# Displays for the codes used in the US Core ombCategory slices.
+_OMB_DISPLAY = {
+    "2106-3": "White",
+    "2054-5": "Black or African American",
+    "2135-2": "Hispanic or Latino",
+    "UNK": "Unknown",
+}
+
+# The cohort carries a single 4-level variable that mixes race and ethnicity and
+# has no ethnicity column, so neither axis can be derived from the other. Levels
+# without a code inside the US Core 6.1 required value sets map to the
+# NullFlavor ``UNK`` rather than to a plausible category.
+# race value -> (race ombCategory, race text, ethnicity ombCategory, eth. text)
+_RACE_ETHNICITY_MAP: dict[str, tuple[str, str, str, str]] = {
+    "White": ("2106-3", "White", "UNK", "Unknown"),
+    "Black": ("2054-5", "Black or African American", "UNK", "Unknown"),
+    "Hispanic": ("UNK", "Unknown", "2135-2", "Hispanic or Latino"),
+    "Other": (
+        "UNK",
+        "Other (not classifiable to an OMB race category)",
+        "UNK",
+        "Unknown",
+    ),
+}
+_UNKNOWN_RACE_ETHNICITY = ("UNK", "Unknown", "UNK", "Unknown")
+
+_HEARTLAND_METHOD_TEXT = "HEARTLAND Protocol v3.2 Risk Score"
+_RISK_TIER_DISPLAY = {
+    "low": "Low Risk",
+    "moderate": "Moderate Risk",
+    "high": "High Risk",
+}
 
 
 def _uuid() -> str:
@@ -39,40 +98,53 @@ def _birth_year(age: int, reference_date: str) -> int:
     return ref_year - int(age)
 
 
-def _patient_resource(row: pd.Series, reference_date: str) -> dict[str, Any]:
-    race_map = {
-        "White": ("2106-3", "White"),
-        "Black": ("2054-5", "Black or African American"),
-        "Hispanic": ("2135-2", "Hispanic or Latino"),
-        "Other": ("2131-1", "Other Race"),
+def _omb_coding(code: str) -> dict[str, str]:
+    """Coding for a US Core ``ombCategory`` slice.
+
+    ``UNK`` / ``ASKU`` come from v3-NullFlavor; OMB categories come from the CDC
+    race & ethnicity system. Both are inside the US Core 6.1 required value sets.
+    """
+    system = _NULL_FLAVOR_SYSTEM if code in {"UNK", "ASKU"} else _OMB_SYSTEM
+    return {"system": system, "code": code, "display": _OMB_DISPLAY[code]}
+
+
+def _us_core_extension(url: str, code: str, text: str) -> dict[str, Any]:
+    return {
+        "url": url,
+        "extension": [
+            {"url": "ombCategory", "valueCoding": _omb_coding(code)},
+            {"url": "text", "valueString": text},
+        ],
     }
-    race_code, race_display = race_map.get(row["race"], ("2131-1", "Other Race"))
+
+
+def _patient_resource(row: pd.Series, reference_date: str) -> dict[str, Any]:
+    race_code, race_text, eth_code, eth_text = _RACE_ETHNICITY_MAP.get(
+        row["race"], _UNKNOWN_RACE_ETHNICITY
+    )
 
     resource: dict[str, Any] = {
         "resourceType": "Patient",
         "id": str(row["patient_id"]),
         "extension": [
-            {
-                "url": _US_CORE_RACE_EXT,
-                "extension": [
-                    {
-                        "url": "ombCategory",
-                        "valueCoding": {
-                            "system": "urn:oid:2.16.840.1.113883.6.238",
-                            "code": race_code,
-                            "display": race_display,
-                        },
-                    },
-                    {"url": "text", "valueString": race_display},
-                ],
-            }
+            _us_core_extension(_US_CORE_RACE_EXT, race_code, race_text),
+            _us_core_extension(_US_CORE_ETHNICITY_EXT, eth_code, eth_text),
         ],
         "gender": "female" if row["sex"] == "F" else "male",
         "birthDate": str(_birth_year(row["age"], reference_date)),
         "address": [
             {
+                "extension": [
+                    {
+                        "url": _SYNTHETIC_COUNTY_EXT,
+                        "valueCoding": {
+                            "system": _SYNTHETIC_COUNTY_SYSTEM,
+                            "code": str(row["county_fips"]),
+                            "display": _SYNTHETIC_COUNTY_DISPLAY,
+                        },
+                    }
+                ],
                 "state": str(row["state"]),
-                "postalCode": str(row["county_fips"])[:5],
                 "use": "home",
                 "country": "US",
             }
@@ -169,9 +241,29 @@ def _medication_statement(
     }
 
 
+def _risk_tier_concept(tier: str) -> dict[str, Any]:
+    display = _RISK_TIER_DISPLAY[tier]
+    return {
+        "coding": [
+            {
+                "system": FHIR_CODES["heartland_risk_tier_system"],
+                "code": tier,
+                "display": display,
+            }
+        ],
+        "text": display,
+    }
+
+
 def _heartland_score_observation(
     patient_id: str, score: int, tier: str, reference_date: str
 ) -> dict[str, Any]:
+    """Observation carrying the 0-18 point total that feeds the RiskAssessment.
+
+    The total is a heuristic point count, not a probability, so it stays in an
+    Observation referenced from ``RiskAssessment.basis`` instead of being
+    written to ``RiskAssessment.prediction.probabilityDecimal``.
+    """
     return {
         "resourceType": "Observation",
         "id": _uuid(),
@@ -210,9 +302,32 @@ def _heartland_score_observation(
                         }
                     ]
                 },
-                "valueString": str(tier),
+                "valueCodeableConcept": _risk_tier_concept(str(tier)),
             }
         ],
+    }
+
+
+def _heartland_risk_assessment(
+    patient_id: str, tier: str, basis_observation_id: str, reference_date: str
+) -> dict[str, Any]:
+    """RiskAssessment carrying the HEARTLAND tier as a coded qualitative risk.
+
+    ``prediction.probabilityDecimal`` is deliberately absent: the HEARTLAND
+    total is a 0-18 point count, and R4 defines ``probability[x]`` as the
+    likelihood of an outcome. No ``meta.profile`` is declared — the HEARTLAND IG
+    profile is published in a separate repository and these Bundles have not
+    been validated against it.
+    """
+    return {
+        "resourceType": "RiskAssessment",
+        "id": _uuid(),
+        "status": "final",
+        "subject": {"reference": f"Patient/{patient_id}"},
+        "occurrenceDateTime": reference_date,
+        "method": {"text": _HEARTLAND_METHOD_TEXT},
+        "basis": [{"reference": f"Observation/{basis_observation_id}"}],
+        "prediction": [{"qualitativeRisk": _risk_tier_concept(tier)}],
     }
 
 
@@ -260,12 +375,14 @@ def _build_bundle(row: pd.Series) -> dict[str, Any]:
         if int(row.get(key, 0)) == 1:
             _add(_medication_statement(patient_id, rxcode, display, reference_date))
 
-    # HEARTLAND score
-    _add(_heartland_score_observation(
-        patient_id,
-        int(row["heartland_risk_score"]),
-        str(row["heartland_risk_tier"]),
-        reference_date,
+    # HEARTLAND score total, then the tier as a RiskAssessment based on it
+    tier = str(row["heartland_risk_tier"])
+    score_observation = _heartland_score_observation(
+        patient_id, int(row["heartland_risk_score"]), tier, reference_date
+    )
+    _add(score_observation)
+    _add(_heartland_risk_assessment(
+        patient_id, tier, score_observation["id"], reference_date
     ))
 
     return {

@@ -255,8 +255,16 @@ FHIR_CODES = {
         "on_mra": ("321064", "Mineralocorticoid receptor antagonist"),
         "on_sglt2i": ("1545653", "Sodium-glucose cotransporter 2 inhibitor"),
     },
-    # Custom coding for HEARTLAND risk score.
-    "heartland_system": "http://heartlandprotocol.org/fhir/CodeSystem/risk-score",
+    # Custom coding for HEARTLAND risk score. Both canonicals sit under the
+    # HEARTLAND IG canonical base declared in fhir-ig/sushi-config.yaml
+    # (https://fhir.heartlandprotocol.org). The risk-tier CodeSystem is the one
+    # published by the IG (codes: low | moderate | high).
+    "heartland_system": (
+        "https://fhir.heartlandprotocol.org/CodeSystem/heartland-risk-score"
+    ),
+    "heartland_risk_tier_system": (
+        "https://fhir.heartlandprotocol.org/CodeSystem/heartland-risk-tier"
+    ),
     "reference_date": "2026-01-01",
 }
 
