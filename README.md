@@ -26,7 +26,7 @@ that distinguish HEARTLAND from MAGGIC / GWTG-HF / SHFM:
 
 Researchers working on rural HF risk stratification have had to simulate these
 manually. `heartland-synthetic` fills the gap, ships with the exact scoring
-engine used in the clinical-decision-support prototype, and is publishable as a
+engine used in the HEARTLAND clinical implementation companion, and is publishable as a
 citeable artifact under MIT + Zenodo DOI.
 
 ## Install
