@@ -4,7 +4,25 @@ All notable changes to `heartland-synthetic` are documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 versions follow [SemVer](https://semver.org/).
 
-## [0.3.0] - 2026-09-17
+## [0.3.0] - Unreleased candidate
+
+Initially prepared 2026-09-17; further local hardening 2026-09-29. The
+version number in source is not evidence of a PyPI, GitHub, or Zenodo release.
+
+### Fixed
+- Scoring now rejects incomplete or structurally invalid inputs before
+  evaluation. Nulls/NaN/infinity, strings, boolean measurements, non-binary
+  flags, and fractional/out-of-range CKM categories no longer yield a score.
+  `classify_tier` rejects totals outside integral 0–18 and booleans.
+- DataFrame scoring rejects duplicate columns, handles empty complete tables,
+  preserves row order/index/extras without mutating input, and fails the whole
+  call when any row is invalid. No imputation or coercion is performed.
+- README describes the existing social-support field as a legacy synthetic
+  proxy, not an ESSI instrument. Structural checks do not validate physiology,
+  instrument equivalence, predictive performance, or real-patient use.
+- Regression coverage includes all 1,024 complete criterion combinations,
+  numeric threshold boundaries, invalid inputs, pandas/NumPy scalars,
+  duplicate/MultiIndex labels, empty tables, and input preservation.
 
 ### Changed
 - `export_fhir_bundle`: `Patient.address` no longer writes the synthetic
@@ -46,9 +64,10 @@ versions follow [SemVer](https://semver.org/).
   and a static guard on the REDCap field-name boundary.
 
 ### Unchanged
-- The generator is untouched: no column was added, renamed or recalibrated,
-  and no seed changed. The public 1,000-row, seed-42 benchmark cohort and its
-  published CSV are byte-identical; only the shape of the FHIR export changed.
+- No sampling distribution, point weight, threshold, output column, or seed
+  was changed. The public 1,000-row, seed-42 benchmark CSV is preserved;
+  candidate changes concern export shape and rejection of invalid scoring
+  inputs, not a regenerated benchmark or a validated clinical instrument.
 
 ## [0.2.2] - 2026-08-24
 

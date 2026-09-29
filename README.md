@@ -22,11 +22,11 @@ Synthea and other synthetic-patient generators do not model the two variables
 that distinguish HEARTLAND from MAGGIC / GWTG-HF / SHFM:
 
 - **Distance to cardiology care** (rural barrier)
-- **Social support** (ENRICHD ESSI scale)
+- **Social support** (a legacy synthetic numeric proxy, not an ESSI instrument)
 
 Researchers working on rural HF risk stratification have had to simulate these
-manually. `heartland-synthetic` fills the gap, ships with the exact scoring
-engine used in the HEARTLAND clinical implementation companion, and is publishable as a
+manually. `heartland-synthetic` exposes these modeled variables and the point
+weights used in the HEARTLAND clinical implementation companion, and is publishable as a
 citeable artifact under MIT + Zenodo DOI.
 
 ## Install
@@ -101,7 +101,7 @@ HEARTLAND score and tier already computed.
 | `ckd_stage` | int | 1-5 (KDIGO) |
 | `ckm_stage` | int | 0-4 (AHA 2023) |
 | `distance_to_cardiology_mi` | float | Miles |
-| `social_support_score` | int | ENRICHD ESSI 8-40 |
+| `social_support_score` | int | Legacy synthetic proxy, generated range 8-40; not an ESSI scale |
 | `prior_hf_hosp_6mo` | int | 0/1 |
 | `on_acei_arb_arni` / `on_beta_blocker` / `on_mra` / `on_sglt2i` | int | 0/1 |
 | `gdmt_classes_count` | int | 0-4 |
@@ -128,7 +128,7 @@ HEARTLAND score and tier already computed.
 | CKD stage | Deterministic from eGFR | KDIGO 2012 |
 | CKM stage | Cascade on diabetes, CKD, BMI, age | AHA 2023 Presidential Advisory |
 | Distance to cardiology | LogNormal (rural vs urban) | NPPES NPI / Atlas |
-| Social support | Normal (rural 24, urban 29) | ENRICHD ESSI |
+| Social support | Normal (rural 24, urban 29), rounded and clipped to 8-40 | Legacy simulation assumption, not an ESSI implementation |
 | GDMT rates | Bernoulli, rural vs urban | CHAMP-HF |
 | 1-yr mortality per tier | 0.06 / 0.15 / 0.32 | MAGGIC + Manemann 2018 |
 | 1-yr hospitalization per tier | 0.18 / 0.35 / 0.55 | GWTG-HF readmission |
@@ -136,22 +136,54 @@ HEARTLAND score and tier already computed.
 All numeric constants live in `src/heartland_synthetic/registries.py` with
 inline citations.
 
-## Apply HEARTLAND scoring on external data
+## Apply HEARTLAND scoring on a synthetic input table
 
 ```python
 from heartland_synthetic import apply_heartland_scoring
 import pandas as pd
 
-df = pd.read_csv("external_cohort.csv")   # must have required columns
+df = pd.read_csv("synthetic_cohort.csv")  # complete synthetic inputs only
 scored = apply_heartland_scoring(df)
 ```
 
 Required columns: `age, prior_hf_hosp_6mo, egfr, bnp, sbp, diabetes, lvef,
 ckm_stage, distance_to_cardiology_mi, social_support_score`.
 
-The scoring logic is a direct port of `heartland-app/lib/risk-score/engine.ts`
-(Protocol v3.3, Table 1): 10 variables, 18 points maximum, tiers
-`low 0-4 / moderate 5-8 / high >= 9`.
+The ten weights and tier boundaries follow
+`heartland-app/lib/risk-score/engine.ts` (Protocol v3.3, Table 1): 18 points
+maximum, tiers `low 0-4 / moderate 5-8 / high 9-18`. The numeric adapter uses
+**BNP only**, not NT-proBNP. The existing `social_support_score < 18` criterion
+is retained solely as a legacy simulation proxy. It does not establish
+equivalence to an ESSI version, questionnaire, item score, or clinical cutoff.
+Complete boolean-criterion agreement is not clinical validation.
+
+The local 0.3.0 candidate rejects incomplete or structurally invalid input:
+
+- All ten required fields must be present in every row. Missing columns raise
+  `KeyError`; nulls, NaN, infinity, strings, and other unsupported values raise
+  `ValueError`. There is no imputation, string parsing, or default-negative rule.
+- Measurements accept finite Python/NumPy integers or floating-point scalars,
+  but not booleans. `diabetes` and `prior_hf_hosp_6mo` accept explicit booleans or
+  numeric values exactly equal to 0 or 1. `ckm_stage` must be integral in 0–4.
+- `classify_tier` accepts integral numeric totals in 0–18, never booleans,
+  fractional values, or missing values. Integral floating-point values are
+  supported for pandas compatibility.
+- Duplicate column labels are rejected. An empty table still needs all ten
+  columns and returns typed, empty score/tier columns. Row order, index
+  (including duplicate labels), and extra columns are retained. Missing values
+  in unrelated extra columns do not prevent scoring.
+- Existing score/tier columns are recomputed on a copy. One invalid row fails
+  the whole call, without changing the input or returning a partially scored
+  table. Errors identify a fixed field name, not input values or row identifiers.
+
+These checks establish **structural completeness only**. They do not check
+physiologic plausibility, reconcile units, validate the social-support
+instrument, or authorize processing of real patient data. The generator's
+8–40 proxy range is not imposed on external numeric inputs. Predicates exposed
+through `RISK_VARIABLES` are low-level definitions for already validated input;
+use `apply_heartland_scoring` or `compute_row_score` for input checking. The
+HEARTLAND framework remains proposed pending validation against clinical
+outcomes. Do not provide real patient, personal, or health information.
 
 ## Monthly time series
 

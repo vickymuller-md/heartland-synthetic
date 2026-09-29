@@ -1,14 +1,19 @@
 """HEARTLAND Risk Score engine.
 
-Port of ``heartland-app/lib/risk-score/engine.ts`` (Protocol v3.3 Table 1).
+Weights from ``heartland-app/lib/risk-score/engine.ts`` (Protocol v3.3 Table 1).
 Maximum possible score: 18. Tier cutoffs: low 0-4, moderate 5-8, high >= 9.
+The numeric adapter uses BNP only and the existing synthetic social-support
+proxy; it is not an ESSI implementation or a clinical plausibility check.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
+from math import isfinite
+from numbers import Integral
 from typing import Callable, Mapping
 
+import numpy as np
 import pandas as pd
 
 from heartland_synthetic.registries import ESSI_LIMITED_CUTOFF
@@ -104,6 +109,52 @@ MAX_SCORE: int = sum(v.points for v in RISK_VARIABLES)  # == 18
 
 TIER_CUTOFFS = {"low": (0, 4), "moderate": (5, 8), "high": (9, 18)}
 
+_REQUIRED_COLUMNS = (
+    "age", "prior_hf_hosp_6mo", "egfr", "bnp", "sbp", "diabetes", "lvef",
+    "ckm_stage", "distance_to_cardiology_mi", "social_support_score",
+)
+_BINARY_COLUMNS = {"prior_hf_hosp_6mo", "diabetes"}
+
+
+def _finite_real(value: object) -> bool:
+    # bool subclasses int; accepting it as a measurement would silently score it.
+    # NumPy durations inherit Integral too, including the missing NaT sentinel.
+    if isinstance(value, (bool, np.bool_, np.timedelta64, np.datetime64)):
+        return False
+    if isinstance(value, Integral):
+        return True
+    if isinstance(value, np.floating):
+        return bool(np.isfinite(value))
+    if isinstance(value, float):
+        return isfinite(value)
+    return False
+
+
+def _validate_row(row: Mapping | pd.Series) -> None:
+    if not isinstance(row, (Mapping, pd.Series)):
+        raise TypeError("compute_row_score: expected a mapping or pandas Series")
+    if isinstance(row, pd.Series) and row.index.has_duplicates:
+        raise ValueError("compute_row_score: duplicate field names are not allowed")
+    missing = [name for name in _REQUIRED_COLUMNS if name not in row]
+    if missing:
+        raise KeyError(f"compute_row_score: missing required columns: {missing}")
+    for name in _REQUIRED_COLUMNS:
+        value = row[name]
+        if name in _BINARY_COLUMNS:
+            valid = isinstance(value, (bool, np.bool_)) or (
+                _finite_real(value) and value in (0, 1)
+            )
+            expected = "an explicit boolean or numeric 0/1"
+        elif name == "ckm_stage":
+            valid = _finite_real(value) and 0 <= value <= 4 and value == int(value)
+            expected = "an integer category from 0 to 4"
+        else:
+            valid = _finite_real(value)
+            expected = "a finite real number, not a boolean"
+        if not valid:
+            # Never include input values or row identifiers in errors.
+            raise ValueError(f"compute_row_score: {name} must be {expected}; missing values are not scored")
+
 
 def classify_tier(score: int) -> str:
     """Return HEARTLAND tier for a numeric score.
@@ -118,6 +169,8 @@ def classify_tier(score: int) -> str:
     str
         One of ``"low"`` (0-4), ``"moderate"`` (5-8), ``"high"`` (>= 9).
     """
+    if not (_finite_real(score) and 0 <= score <= MAX_SCORE and score == int(score)):
+        raise ValueError("classify_tier: score must be an integer from 0 to 18, not a boolean")
     if score <= 4:
         return "low"
     if score <= 8:
@@ -125,8 +178,14 @@ def classify_tier(score: int) -> str:
     return "high"
 
 
-def compute_row_score(row: Mapping) -> int:
-    """Sum HEARTLAND points for a single patient record."""
+def compute_row_score(row: Mapping | pd.Series) -> int:
+    """Sum points for one complete synthetic record; invalid inputs raise.
+
+    Validation is structural, not clinical. No missing-value imputation or
+    string coercion is performed. Predicates in RISK_VARIABLES are low-level
+    definitions and do not independently validate input.
+    """
+    _validate_row(row)
     return int(sum(v.points for v in RISK_VARIABLES if v.predicate(row)))
 
 
@@ -134,31 +193,32 @@ def apply_heartland_scoring(df: pd.DataFrame) -> pd.DataFrame:
     """Return a copy of ``df`` with ``heartland_risk_score`` and
     ``heartland_risk_tier`` columns appended.
 
-    The input frame must contain the columns referenced by each
-    :data:`RISK_VARIABLES` predicate.
+    All ten required inputs must be complete and structurally valid in every
+    row. One invalid row raises before returning a result; the input is never
+    mutated. Duplicate column labels are rejected. Extra columns and the index
+    (including duplicate labels) are preserved; existing score/tier columns are
+    recomputed. An empty frame still requires all ten columns.
     """
-    required = {
-        "age",
-        "prior_hf_hosp_6mo",
-        "egfr",
-        "bnp",
-        "sbp",
-        "diabetes",
-        "lvef",
-        "ckm_stage",
-        "distance_to_cardiology_mi",
-        "social_support_score",
-    }
-    missing = required - set(df.columns)
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError("apply_heartland_scoring: expected a pandas DataFrame")
+    if df.columns.has_duplicates:
+        raise ValueError("apply_heartland_scoring: duplicate column names are not allowed")
+    missing = set(_REQUIRED_COLUMNS) - set(df.columns)
     if missing:
         raise KeyError(
             f"apply_heartland_scoring: missing required columns: {sorted(missing)}"
         )
 
-    scores = df.apply(compute_row_score, axis=1).astype(int)
+    # Avoid axis=1 dtype coercion (for example, a boolean becoming numeric).
+    scores = [
+        compute_row_score(dict(zip(_REQUIRED_COLUMNS, values)))
+        for values in df.loc[:, list(_REQUIRED_COLUMNS)].itertuples(index=False, name=None)
+    ]
     out = df.copy()
-    out["heartland_risk_score"] = scores
-    out["heartland_risk_tier"] = scores.map(classify_tier)
+    out["heartland_risk_score"] = pd.Series(scores, index=df.index, dtype="int64")
+    out["heartland_risk_tier"] = pd.Series(
+        [classify_tier(score) for score in scores], index=df.index, dtype="str"
+    )
     return out
 
 
