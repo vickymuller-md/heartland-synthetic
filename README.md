@@ -274,13 +274,20 @@ Each collection Bundle contains:
   extensions. The cohort carries one 4-level variable that mixes race and
   ethnicity, so `Hispanic` is written to ethnicity (race `UNK`) and `Other`
   is written as `UNK` on both axes — neither axis is inferred from the other.
-- `Condition` for HF subtype (ICD-10 I50.2 / I50.3 / I50.4), plus
-  diabetes / CKD stage / AF / prior HF hospitalization when present
-- `Observation` for LVEF / eGFR / BNP / SBP / DBP / HR / BMI (LOINC)
-- `MedicationStatement` for each GDMT class the patient is on (RxNorm)
+- Text-only `Condition` for the assigned HF simulation group and positive
+  diabetes/AF flags; no inferred ICD diagnoses, CKD or diabetes subtype
+- Quantity `Observation` for LVEF / BNP / SBP / DBP / HR / BMI (LOINC), with
+  SBP/DBP as components of one blood-pressure panel and generic text-only eGFR
+  because no estimation formula was actually calculated
+- Text-only `Observation` for legacy eGFR/CKM bins, support proxy, modeled
+  distance and prior-hospitalization flag, with their simulation limits
+- Text-only `MedicationStatement` for positive simulated class flags, with
+  status `unknown`; no specific drug, dose or actual receipt is inferred
 - `Observation` for the HEARTLAND score total (0-18 points) under the custom
   CodeSystem
-  `https://fhir.heartlandprotocol.org/CodeSystem/heartland-risk-score`
+  `https://fhir.heartlandprotocol.org/CodeSystem/heartland-risk-score`, plus all
+  ten Boolean criterion components (including false), explicitly labeled as
+  simulated inputs/proxies rather than a verified clinical assessment
 - `RiskAssessment` carrying the tier as a coded `prediction.qualitativeRisk`
   (`https://fhir.heartlandprotocol.org/CodeSystem/heartland-risk-tier`), with
   the score `Observation` as `basis`. `prediction.probabilityDecimal` is left
@@ -290,7 +297,12 @@ Each collection Bundle contains:
 in an extension whose system URI marks it as synthetic; it is never written to
 `Address.postalCode`. No resource declares `meta.profile`: the Bundles have not
 been validated against US Core 6.1 or the HEARTLAND IG, so they assert no
-profile conformance.
+profile conformance. Valid UUID entry URLs and exact internal references make
+subjects/basis resolvable within each collection. Every resource is tagged as
+synthetic research/testing data; the fixed reference date is not an actual
+clinical event date. This is not a lossless cohort export or EHR import plan.
+See [FHIR mapping and compatibility changes](docs/fhir_export_mapping.md),
+including omitted source fields and withdrawn legacy codes.
 
 ## Reproducibility
 

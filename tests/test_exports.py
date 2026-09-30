@@ -169,7 +169,7 @@ def test_fhir_bundle_structure(tmp_path, cohort_for_exports):
 
     types = [e["resource"]["resourceType"] for e in bundle["entry"]]
     assert "Patient" in types
-    # 7 vital-sign / lab Observations + 1 HEARTLAND score Observation.
+    # Measurements (BP is one panel), modeled inputs and the score Observation.
     assert types.count("Observation") >= 8
     assert types.count("Condition") >= 1  # HF type always present
 
@@ -192,12 +192,14 @@ def test_fhir_observations_use_loinc(tmp_path, cohort_for_exports):
         res = entry["resource"]
         if res["resourceType"] != "Observation":
             continue
-        system = res["code"]["coding"][0]["system"]
-        # LOINC vitals/labs, or the custom HEARTLAND system for the score.
-        assert system in (
-            "http://loinc.org",
-            "https://fhir.heartlandprotocol.org/CodeSystem/heartland-risk-score",
-        )
+        # Known measurement concepts/score are coded; generic eGFR and
+        # simulation proxies deliberately carry text instead of invented codes.
+        assert res["code"]["text"]
+        for coding in res["code"].get("coding", []):
+            assert coding["system"] in (
+                "http://loinc.org",
+                "https://fhir.heartlandprotocol.org/CodeSystem/heartland-risk-score",
+            )
 
 
 def test_fhir_medstatements_match_source_row(tmp_path, cohort_for_exports):
@@ -330,11 +332,13 @@ def test_risk_assessment_shape(tmp_path, cohort_for_exports):
         assert coding["code"] == row["heartland_risk_tier"]
 
         # basis resolves to the score Observation in the same Bundle
-        basis_id = ra["basis"][0]["reference"].split("/")[-1]
+        basis_url = ra["basis"][0]["reference"]
         score_obs = [
-            o for o in _resources(bundle, "Observation") if o["id"] == basis_id
+            entry["resource"] for entry in bundle["entry"]
+            if entry["fullUrl"] == basis_url
         ]
         assert len(score_obs) == 1
+        assert score_obs[0]["resourceType"] == "Observation"
         assert score_obs[0]["valueInteger"] == int(row["heartland_risk_score"])
 
 

@@ -223,39 +223,32 @@ TIMESERIES_PARAMS = {
 # FHIR R4 coding tables
 # -----------------------------------------------------------------------------
 FHIR_CODES = {
-    # ICD-10 Condition codes for HF subtypes and major comorbidities.
-    "icd10": {
-        "hfref": ("I50.2", "Systolic (congestive) heart failure"),
-        "hfmref": ("I50.4", "Combined systolic and diastolic heart failure"),
-        "hfpef": ("I50.3", "Diastolic (congestive) heart failure"),
-        "diabetes": ("E11.9", "Type 2 diabetes mellitus without complications"),
-        "af": ("I48.91", "Unspecified atrial fibrillation"),
-        "prior_hf_hosp": ("Z86.79",
-                          "Personal history of other diseases of the circulatory system"),
-        "ckd": {
-            1: ("N18.1", "Chronic kidney disease, stage 1"),
-            2: ("N18.2", "Chronic kidney disease, stage 2 (mild)"),
-            3: ("N18.30", "Chronic kidney disease, stage 3 unspecified"),
-            4: ("N18.4", "Chronic kidney disease, stage 4 (severe)"),
-            5: ("N18.5", "Chronic kidney disease, stage 5"),
-        },
+    "blood_pressure_panel": ("85354-9", "Blood pressure panel with all children optional"),
+    # Simulation groups do not establish an ICD diagnosis/subtype.
+    "condition_text": {
+        "hfref": "Simulated HFrEF group",
+        "hfmref": "Simulated HFmrEF group",
+        "hfpef": "Simulated HFpEF group",
+        "diabetes": "Simulated diabetes flag (type and complications unspecified)",
+        "af": "Simulated atrial fibrillation flag",
     },
     # LOINC Observation codes for clinical vitals.
     "loinc": {
         "lvef": ("10230-1", "Left ventricular Ejection fraction", "%"),
-        "egfr": ("98979-8", "Glomerular filtration rate/1.73 sq M.predicted by Creatinine-based formula (CKD-EPI 2021)", "mL/min/{1.73_m2}"),
+        # None means text only: no estimation formula was calculated.
+        "egfr": (None, "Simulated eGFR (formula unspecified)", "mL/min/{1.73_m2}"),
         "bnp": ("30934-4", "Natriuretic peptide B [Mass/volume] in Serum or Plasma", "pg/mL"),
         "sbp": ("8480-6", "Systolic blood pressure", "mm[Hg]"),
         "dbp": ("8462-4", "Diastolic blood pressure", "mm[Hg]"),
         "hr": ("8867-4", "Heart rate", "/min"),
         "bmi": ("39156-5", "Body mass index (BMI) [Ratio]", "kg/m2"),
     },
-    # RxNorm medication class codes for GDMT.
-    "rxnorm": {
-        "on_acei_arb_arni": ("1998", "Angiotensin-converting enzyme inhibitor"),
-        "on_beta_blocker": ("18867", "Beta blocker"),
-        "on_mra": ("321064", "Mineralocorticoid receptor antagonist"),
-        "on_sglt2i": ("1545653", "Sodium-glucose cotransporter 2 inhibitor"),
+    # No specific ingredient, prescription or dose is present in the cohort.
+    "medication_class_text": {
+        "on_acei_arb_arni": "Simulated ACEi/ARB/ARNI class flag",
+        "on_beta_blocker": "Simulated beta-blocker class flag",
+        "on_mra": "Simulated mineralocorticoid receptor antagonist class flag",
+        "on_sglt2i": "Simulated SGLT2 inhibitor class flag",
     },
     # Custom coding for HEARTLAND risk score. Both canonicals sit under the
     # HEARTLAND IG canonical base declared in fhir-ig/sushi-config.yaml

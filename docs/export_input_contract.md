@@ -30,7 +30,9 @@ validation, not PHI detection, clinical validation or institutional acceptance.
   silently fix them. No new weight, clinical cutoff, ESSI scale or range is added.
 - Validate all rows before serializing or touching output. Preserve caller data
   and index. REDCap explicitly orders record_id first and normalizes binary and
-  integer category serialization; FHIR ignores no extra source columns silently.
+  integer category serialization. Unknown extra source columns are rejected;
+  the supported schema does not imply a lossless FHIR mapping. Known source
+  omissions and semantic limits are listed in [FHIR mapping](fhir_export_mapping.md).
 
 ## File ownership
 

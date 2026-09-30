@@ -3,10 +3,10 @@
 Emits JSON files as plain Python dicts — no external FHIR SDK dependency.
 Resources included per patient:
 - Patient
-- Condition (HF type, diabetes, AF, CKD stage, prior HF hospitalization)
-- Observation (LVEF, eGFR, BNP, SBP, DBP, HR, BMI)
-- MedicationStatement (ACEi/ARB/ARNI, beta-blocker, MRA, SGLT2i)
-- Observation (HEARTLAND risk score total, 0-18 points)
+- Text-only Condition (simulated HF group and positive diabetes/AF flags)
+- Observation (measurements, legacy bins/proxies, prior-hospitalization flag)
+- Text-only MedicationStatement (positive simulated class flags, status unknown)
+- Observation (HEARTLAND total/tier and ten Boolean simulation criteria)
 - RiskAssessment (HEARTLAND tier, with the score Observation as ``basis``)
 
 No resource declares ``meta.profile``: the Bundles have not been validated
@@ -23,12 +23,11 @@ from typing import Any
 import pandas as pd
 
 from heartland_synthetic.registries import FHIR_CODES
+from heartland_synthetic.scoring import RISK_VARIABLES
 from heartland_synthetic.exports._validation import validate_cohort, write_new_files
 
 
-_ICD10_SYSTEM = "http://hl7.org/fhir/sid/icd-10-cm"
 _LOINC_SYSTEM = "http://loinc.org"
-_RXNORM_SYSTEM = "http://www.nlm.nih.gov/research/umls/rxnorm"
 _UCUM_SYSTEM = "http://unitsofmeasure.org"
 _US_CORE_RACE_EXT = (
     "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
@@ -88,6 +87,27 @@ _RISK_TIER_DISPLAY = {
     "moderate": "Moderate Risk",
     "high": "High Risk",
 }
+
+_SIMULATION_NOTE = (
+    "Synthetic research/testing data, not a real patient observation. "
+    "The fixed reference date is a simulation anchor, not a clinical event date."
+)
+_CRITERION_LABELS = {
+    "age_over_75": "Simulated age >=75 years (2 points)",
+    "prior_hf_hosp_6mo": "Simulated prior HF hospitalization within 6 months (3 points)",
+    "egfr_below_45": "Simulated eGFR <45 mL/min/1.73m^2 (2 points)",
+    "elevated_natriuretic": "Simulated BNP >=500 pg/mL, BNP-only adapter (2 points)",
+    "sbp_below_100": "Simulated baseline SBP <100 mmHg, not admission SBP (2 points)",
+    "diabetes": "Simulated diabetes flag (1 point)",
+    "lvef_below_30": "Simulated LVEF <30% (2 points)",
+    "ckm_stage_3_or_4": "Simulated legacy CKM category 3 or 4 (2 points)",
+    "distance_over_50_miles": "Modeled distance to cardiology >50 miles (1 point)",
+    "limited_social_support": "Legacy social-support proxy <18, not ESSI or living alone (1 point)",
+}
+
+
+def _synthetic_meta() -> dict[str, Any]:
+    return {"tag": [{"display": "Synthetic research/testing data"}]}
 
 
 def _uuid() -> str:
@@ -154,61 +174,29 @@ def _patient_resource(row: pd.Series, reference_date: str) -> dict[str, Any]:
     return resource
 
 
-def _condition(
-    patient_id: str, code: str, display: str, reference_date: str
-) -> dict[str, Any]:
+def _condition(patient_id: str, display: str) -> dict[str, Any]:
     return {
         "resourceType": "Condition",
         "id": _uuid(),
-        "clinicalStatus": {
-            "coding": [
-                {
-                    "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
-                    "code": "active",
-                }
-            ]
-        },
-        "code": {
-            "coding": [
-                {"system": _ICD10_SYSTEM, "code": code, "display": display}
-            ],
-            "text": display,
-        },
+        "code": {"text": display},
         "subject": {"reference": f"Patient/{patient_id}"},
-        "recordedDate": reference_date,
+        "note": [{"text": _SIMULATION_NOTE + " Assigned simulation group/flag, not an adjudicated diagnosis or assessed disease status."}],
     }
 
 
 def _observation(
     patient_id: str,
-    loinc_code: str,
+    loinc_code: str | None,
     display: str,
     unit: str,
     value: float,
     reference_date: str,
 ) -> dict[str, Any]:
-    return {
+    resource = {
         "resourceType": "Observation",
         "id": _uuid(),
         "status": "final",
-        "category": [
-            {
-                "coding": [
-                    {
-                        "system": "http://terminology.hl7.org/CodeSystem/observation-category",
-                        "code": "vital-signs"
-                        if loinc_code in {"8480-6", "8462-4", "8867-4", "39156-5"}
-                        else "laboratory",
-                    }
-                ]
-            }
-        ],
-        "code": {
-            "coding": [
-                {"system": _LOINC_SYSTEM, "code": loinc_code, "display": display}
-            ],
-            "text": display,
-        },
+        "code": {"text": display},
         "subject": {"reference": f"Patient/{patient_id}"},
         "effectiveDateTime": reference_date,
         "valueQuantity": {
@@ -217,28 +205,75 @@ def _observation(
             "system": _UCUM_SYSTEM,
             "code": unit,
         },
+        "note": [{"text": _SIMULATION_NOTE}],
     }
+    if loinc_code is not None:
+        resource["code"]["coding"] = [
+            {"system": _LOINC_SYSTEM, "code": loinc_code, "display": display}
+        ]
+    # Do not mislabel LVEF as a laboratory test or infer an imaging method.
+    if loinc_code != "10230-1":
+        category = "vital-signs" if loinc_code in {"8480-6", "8462-4", "8867-4", "39156-5"} else "laboratory"
+        resource["category"] = [{"coding": [{
+            "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+            "code": category,
+        }]}]
+    if loinc_code == "30934-4":
+        resource["note"][0]["text"] += (
+            " Assumed serum/plasma concept for this illustrative export; "
+            "no recorded specimen or assay provenance."
+        )
+    if loinc_code is None:
+        resource["note"][0]["text"] += " Sampled eGFR; no estimation formula or creatinine result was generated."
+    return resource
 
 
-def _medication_statement(
-    patient_id: str, rxnorm_code: str, display: str, reference_date: str
-) -> dict[str, Any]:
+def _medication_statement(patient_id: str, display: str) -> dict[str, Any]:
     return {
         "resourceType": "MedicationStatement",
         "id": _uuid(),
-        "status": "active",
-        "medicationCodeableConcept": {
-            "coding": [
-                {
-                    "system": _RXNORM_SYSTEM,
-                    "code": rxnorm_code,
-                    "display": display,
-                }
-            ],
-            "text": display,
-        },
+        "status": "unknown",
+        "medicationCodeableConcept": {"text": display},
+        "subject": {"reference": f"Patient/{patient_id}"},
+        "note": [{"text": _SIMULATION_NOTE + " Positive hypothetical class flag only; no specific drug, dose, treatment dates, prescription or receipt of medication is established."}],
+    }
+
+
+def _blood_pressure(patient_id: str, row: dict[str, Any], reference_date: str) -> dict[str, Any]:
+    code, display = FHIR_CODES["blood_pressure_panel"]
+    components = []
+    for key in ("sbp", "dbp"):
+        code_part, label, unit = FHIR_CODES["loinc"][key]
+        components.append({
+            "code": {"coding": [{"system": _LOINC_SYSTEM, "code": code_part, "display": label}]},
+            "valueQuantity": {"value": float(row[key]), "unit": unit, "system": _UCUM_SYSTEM, "code": unit},
+        })
+    return {
+        "resourceType": "Observation",
+        "id": _uuid(),
+        "status": "final",
+        "category": [{"coding": [{
+            "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+            "code": "vital-signs",
+        }]}],
+        "code": {"coding": [{"system": _LOINC_SYSTEM, "code": code, "display": display}], "text": display},
         "subject": {"reference": f"Patient/{patient_id}"},
         "effectiveDateTime": reference_date,
+        "component": components,
+        "note": [{"text": _SIMULATION_NOTE + " Modeled baseline blood pressure, not an admission measurement."}],
+    }
+
+
+def _modeled_observation(patient_id: str, label: str, value: dict[str, Any], reference_date: str) -> dict[str, Any]:
+    return {
+        "resourceType": "Observation",
+        "id": _uuid(),
+        "status": "final",
+        "code": {"text": label},
+        "subject": {"reference": f"Patient/{patient_id}"},
+        "effectiveDateTime": reference_date,
+        "note": [{"text": _SIMULATION_NOTE + " Modeled input/proxy, not clinical staging, a questionnaire or an adjudicated event."}],
+        **value,
     }
 
 
@@ -257,7 +292,7 @@ def _risk_tier_concept(tier: str) -> dict[str, Any]:
 
 
 def _heartland_score_observation(
-    patient_id: str, score: int, tier: str, reference_date: str
+    patient_id: str, score: int, tier: str, reference_date: str, row: dict[str, Any]
 ) -> dict[str, Any]:
     """Observation carrying the 0-18 point total that feeds the RiskAssessment.
 
@@ -292,6 +327,7 @@ def _heartland_score_observation(
         "subject": {"reference": f"Patient/{patient_id}"},
         "effectiveDateTime": reference_date,
         "valueInteger": int(score),
+        "note": [{"text": _SIMULATION_NOTE + " Proposed point score pending validation. Ten simulated criteria use BNP only, baseline SBP and legacy CKM/support proxies; not a clinical questionnaire or an outcome probability."}],
         "component": [
             {
                 "code": {
@@ -305,6 +341,10 @@ def _heartland_score_observation(
                 },
                 "valueCodeableConcept": _risk_tier_concept(str(tier)),
             }
+        ] + [
+            {"code": {"text": _CRITERION_LABELS[variable.key]},
+             "valueBoolean": bool(variable.predicate(row))}
+            for variable in RISK_VARIABLES
         ],
     }
 
@@ -329,6 +369,7 @@ def _heartland_risk_assessment(
         "method": {"text": _HEARTLAND_METHOD_TEXT},
         "basis": [{"reference": f"Observation/{basis_observation_id}"}],
         "prediction": [{"qualitativeRisk": _risk_tier_concept(tier)}],
+        "note": [{"text": _SIMULATION_NOTE + " Proposed point tier pending validation; not an observed risk or validated outcome likelihood."}],
     }
 
 
@@ -338,57 +379,75 @@ def _build_bundle(row: pd.Series) -> dict[str, Any]:
     patient_id = patient["id"]
 
     entries: list[dict[str, Any]] = []
+    full_urls: dict[str, str] = {}
 
     def _add(res: dict[str, Any]) -> None:
-        rid = res["id"]
-        entries.append(
-            {"fullUrl": f"urn:uuid:{rid}", "resource": res}
-        )
+        key = f"{res['resourceType']}/{res['id']}"
+        full_url = f"urn:uuid:{_uuid()}"
+        if key in full_urls or full_url in full_urls.values():
+            raise ValueError("Duplicate internal FHIR identity")
+        full_urls[key] = full_url
+        res["meta"] = _synthetic_meta()
+        entries.append({"fullUrl": full_url, "resource": res})
 
     _add(patient)
 
     # Conditions
-    hf_code, hf_display = FHIR_CODES["icd10"][row["hf_type"]]
-    _add(_condition(patient_id, hf_code, hf_display, reference_date))
-    if int(row["diabetes"]):
-        code, disp = FHIR_CODES["icd10"]["diabetes"]
-        _add(_condition(patient_id, code, disp, reference_date))
-    if int(row["af"]):
-        code, disp = FHIR_CODES["icd10"]["af"]
-        _add(_condition(patient_id, code, disp, reference_date))
-    ckd_stage = int(row["ckd_stage"])
-    if ckd_stage in FHIR_CODES["icd10"]["ckd"]:
-        code, disp = FHIR_CODES["icd10"]["ckd"][ckd_stage]
-        _add(_condition(patient_id, code, disp, reference_date))
-    if int(row["prior_hf_hosp_6mo"]):
-        code, disp = FHIR_CODES["icd10"]["prior_hf_hosp"]
-        _add(_condition(patient_id, code, disp, reference_date))
+    _add(_condition(patient_id, FHIR_CODES["condition_text"][row["hf_type"]]))
+    for key in ("diabetes", "af"):
+        if int(row[key]):
+            _add(_condition(patient_id, FHIR_CODES["condition_text"][key]))
 
     # Observations — vitals / labs
-    for key in ("lvef", "egfr", "bnp", "sbp", "dbp", "hr", "bmi"):
+    for key in ("lvef", "egfr", "bnp", "hr", "bmi"):
         loinc_code, display, unit = FHIR_CODES["loinc"][key]
         _add(_observation(
             patient_id, loinc_code, display, unit, float(row[key]), reference_date
         ))
+    _add(_blood_pressure(patient_id, row, reference_date))
 
-    # Medication statements
-    for key, (rxcode, display) in FHIR_CODES["rxnorm"].items():
+    for label, value in [
+        ("Legacy simulated eGFR bin (not a CKD diagnosis)", {"valueInteger": int(row["ckd_stage"])}),
+        ("Legacy simulated CKM category (not adjudicated staging)", {"valueInteger": int(row["ckm_stage"])}),
+        ("Legacy social-support proxy (not ESSI)", {"valueQuantity": {"value": float(row["social_support_score"])}}),
+        ("Modeled distance to cardiology", {"valueQuantity": {"value": float(row["distance_to_cardiology_mi"]), "unit": "miles", "system": _UCUM_SYSTEM, "code": "[mi_i]"}}),
+        ("Simulated prior HF hospitalization within 6 months", {"valueBoolean": bool(row["prior_hf_hosp_6mo"])}),
+    ]:
+        _add(_modeled_observation(patient_id, label, value, reference_date))
+
+    # Positive class flags only; zero can be an unsampled placeholder.
+    for key, display in FHIR_CODES["medication_class_text"].items():
         if int(row.get(key, 0)) == 1:
-            _add(_medication_statement(patient_id, rxcode, display, reference_date))
+            _add(_medication_statement(patient_id, display))
 
     # HEARTLAND score total, then the tier as a RiskAssessment based on it
     tier = str(row["heartland_risk_tier"])
     score_observation = _heartland_score_observation(
-        patient_id, int(row["heartland_risk_score"]), tier, reference_date
+        patient_id, int(row["heartland_risk_score"]), tier, reference_date, row
     )
     _add(score_observation)
     _add(_heartland_risk_assessment(
         patient_id, tier, score_observation["id"], reference_date
     ))
 
+    # Relative Type/id references are not resolvable against urn:uuid entries.
+    # Fail closed if a future builder introduces an unregistered reference.
+    def _resolve(node: Any) -> None:
+        if isinstance(node, dict):
+            if "reference" in node:
+                node["reference"] = full_urls[node["reference"]]
+            for value in node.values():
+                _resolve(value)
+        elif isinstance(node, list):
+            for value in node:
+                _resolve(value)
+
+    _resolve(entries)
+
     return {
         "resourceType": "Bundle",
         "id": _uuid(),
+        "meta": _synthetic_meta(),
         "type": "collection",
         "timestamp": f"{reference_date}T00:00:00Z",
         "entry": entries,

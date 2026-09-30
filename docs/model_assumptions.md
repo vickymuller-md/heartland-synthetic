@@ -85,8 +85,12 @@ FHIR output is a plain R4 collection Bundle. A score is a point count, not a
 probability; the candidate expresses its tier qualitatively. No `meta.profile`
 claim is emitted. JSON generation and local structural tests do not establish
 full terminology/profile conformance, EHR acceptance, or a lossless exchange.
-Legacy coding tables require their own semantic verification; they are not
-validated by the public wording changes in this ledger.
+The candidate mapping withdraws inferred ICD diagnoses, drug-specific RxNorm
+codes and formula-specific eGFR coding. Text-only simulated groups/class flags
+do not establish clinical diagnoses or medication receipt. Ten explicit Boolean
+criterion components use the existing BNP-only/legacy-proxy adapter; this is
+not a clinical questionnaire. See [FHIR mapping](fhir_export_mapping.md) for
+retained codes, exact internal references, source omissions and validation scope.
 
 ## Reproducibility and verification
 

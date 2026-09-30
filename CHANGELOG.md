@@ -10,6 +10,15 @@ Initially prepared 2026-09-17; further local hardening 2026-09-29. The
 version number in source is not evidence of a PyPI, GitHub, or Zenodo release.
 
 ### Fixed
+- FHIR collection entry URLs are valid UUID URNs; all subject/basis references
+  resolve to exact entries. Patient source ids and filenames remain unchanged.
+- FHIR blood pressure is now one LOINC 85354-9 panel with systolic/diastolic
+  components, matching the R4 vital-sign representation instead of separate
+  standalone SBP/DBP resources. Numeric values and units are preserved.
+- FHIR no longer infers ICD diagnoses or specific RxNorm ingredients from
+  broad simulation groups/class flags, nor CKD-EPI 2021 from sampled eGFR.
+  LVEF retains method-neutral LOINC 10230-1. Explicit Boolean components expose
+  all ten simulated score criteria; weights and cohort generation are unchanged.
 - Scoring now rejects incomplete or structurally invalid inputs before
   evaluation. Nulls/NaN/infinity, strings, boolean measurements, non-binary
   flags, and fractional/out-of-range CKM categories no longer yield a score.
@@ -25,6 +34,11 @@ version number in source is not evidence of a PyPI, GitHub, or Zenodo release.
   duplicate/MultiIndex labels, empty tables, and input preservation.
 
 ### Changed
+- FHIR resources carry synthetic-data tags and mapping notes. CKD/CKM bins,
+  support/distance proxies and prior-hospitalization flags are observations,
+  not inferred diagnoses. MedicationStatement classes are text-only with
+  unknown status and no invented treatment dates/doses. Legacy ICD/RxNorm
+  tables are withdrawn; consumers must follow `docs/fhir_export_mapping.md`.
 - Standalone REDCap labels and notes identify simulated proxies, categories,
   medication placeholders and assumed outcomes. The historical Template
   crosswalk documents non-equivalence instead of unsupported conversions;
