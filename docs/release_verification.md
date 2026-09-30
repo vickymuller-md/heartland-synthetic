@@ -1,6 +1,9 @@
 # Distribution verification and release boundary
 
-The 0.3.0 source candidate is not published merely because these checks pass.
+The 0.3.0 GitHub/PyPI release and source archive
+[10.5281/zenodo.23050640](https://doi.org/10.5281/zenodo.23050640) were verified
+2026-09-30 UTC. Version 0.3.1 corrects documentation without changing runtime
+behavior. Each new version is not published merely because these checks pass.
 Publishing remains a separately authorized step against an exact reviewed
 commit/tag and set of files. Do not overwrite the frozen public cohort or
 change the published-version labels before registry readback.
@@ -48,7 +51,7 @@ consistent with [NumPy's reported backend issue](https://github.com/numpy/numpy/
 not proof that every warning on every input is harmless.
 
 The tested Python 3.12/NumPy 2.5.3 runtime did not emit those warnings. Prefer a
-verified modern runtime for this candidate's local research examples; preserve
+verified modern runtime for local research examples; preserve
 environment versions with results. No warnings are globally suppressed, and no
 sampling expression/distribution is changed to work around the older backend.
 These local receipts do not imply that every OS/dependency combination was tested.

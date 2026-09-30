@@ -16,10 +16,11 @@ educational demonstrations using synthetic data. It does not establish
 clinical realism, predictive validity, patient outcomes, or institutional
 interoperability. Do not supply real patient, personal, or health information.
 
-**Release status (checked 2026-09-29):** source is a **0.3.0 candidate**;
-[PyPI currently publishes 0.2.2](https://pypi.org/project/heartland-synthetic/0.2.2/).
-Candidate input checks and export changes are not included in that published
-version. The preserved benchmark remains dataset v1.0.0; its original
+**Release line: 0.3.1 (documentation maintenance).** Input checks and export
+changes were released in [0.3.0](https://pypi.org/project/heartland-synthetic/0.3.0/),
+archived at [10.5281/zenodo.23050640](https://doi.org/10.5281/zenodo.23050640).
+Version 0.3.1 corrects release documentation; it does not change the generator,
+scoring or exporters. The preserved benchmark remains dataset v1.0.0; its original
 provenance cites the v0.2.1 software archive, not the later PyPI release.
 It is not renamed or regenerated when the software changes.
 
@@ -37,10 +38,12 @@ establishing superiority or exclusivity over other generators or risk models.
 ## Install
 
 ```bash
-pip install heartland-synthetic==0.2.2
+pip install heartland-synthetic==0.3.1
 ```
 
-That command installs the published version, not the local candidate.
+That command targets this release line. Verify availability and file hashes on
+[the versioned registry page](https://pypi.org/project/heartland-synthetic/0.3.1/);
+a source version or successful build alone is not a publication receipt.
 For a reviewed source checkout, use an editable development install:
 
 ```bash
@@ -172,7 +175,7 @@ is retained solely as a legacy simulation proxy. It does not establish
 equivalence to an ESSI version, questionnaire, item score, or clinical cutoff.
 Complete boolean-criterion agreement is not clinical validation.
 
-The local 0.3.0 candidate rejects incomplete or structurally invalid input:
+Since 0.3.0, scoring rejects incomplete or structurally invalid input:
 
 - All ten required fields must be present in every row. Missing columns raise
   `KeyError`; nulls, NaN, infinity, strings, and other unsupported values raise
@@ -218,7 +221,7 @@ disagree. Neither is an observed outcome or a validation target for the score.
 
 ## REDCap export
 
-Candidate0.3.0 exporters require the complete generated cohort schema, including
+Since 0.3.0, exporters require the complete generated cohort schema, including
 the ten score inputs. They reject extra/duplicate columns, invalid categories,
 missing or lossy numeric values, unsafe/duplicate IDs and inconsistent score,
 tier or GDMT count. Optional annual outcome columns must be supplied together.
@@ -433,6 +436,6 @@ tag/version and environment gates before creating a release, because a public
 release can trigger external publication. Do not push all tags or upload an
 unreviewed `dist/*` directory. Select the exact reviewed tag/artifacts only.
 Verify the resulting PyPI files, GitHub release and Zenodo record separately;
-do not assume a webhook completed. Update the candidate/install labels only
+do not assume a webhook completed. Update website publication labels only
 after public readback. A software release does not replace the benchmark's
 provenance or automatically update its technical report or dataset record.

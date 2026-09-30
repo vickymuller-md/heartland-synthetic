@@ -1,6 +1,7 @@
 # Model assumptions, provenance and limits
 
-This ledger describes the local **0.3.0 candidate**. It separates implemented
+This ledger describes the **0.3.x software line** (0.3.1 is documentation
+maintenance of 0.3.0). It separates implemented
 simulation choices from evidence about real patients. No real patient,
 personal, or health information should be supplied. The proposed HEARTLAND
 framework remains pending validation against clinical outcomes.
@@ -9,13 +10,13 @@ framework remains pending validation against clinical outcomes.
 
 | Artifact | Identity | What it establishes |
 |-|-|-|
-| Published Python package | 0.2.2 on PyPI, checked 2026-09-29 | A downloadable historical release, not the current candidate |
-| Local Python candidate | 0.3.0 in source | Export and input-boundary changes under review, not a publication receipt |
+| Python package | 0.3.0 publication verified 2026-09-30 UTC; 0.3.1 is a documentation-maintenance release line | Input/export checks, not clinical validation; verify the exact installed registry version |
+| Archived source | 0.3.0 at 10.5281/zenodo.23050640; software concept DOI below tracks the version family | A preserved source release, not a new benchmark or a package-installation receipt |
 | Preserved benchmark | Dataset v1.0.0, 1,000 rows/31 columns, seed42; original provenance cites the v0.2.1 software archive | A fixed synthetic artifact; no new cohort or observed clinical outcomes |
 
 The software concept DOI is `10.5281/zenodo.19635042`. The technical report has
 its own concept DOI `10.5281/zenodo.22137199` and archived version1.0
-`10.5281/zenodo.22137200`. Neither is a new DOI for this candidate or this CSV.
+`10.5281/zenodo.22137200`. Neither is a new DOI for the 0.3.x software or this CSV.
 Historical records must not be described as documenting changes made later.
 
 Frozen CSV: `site/public/data/heartland-synthetic-cohort-1000-seed42.csv`.
@@ -71,7 +72,7 @@ simulation transformation, not an estimated hazard model.
 
 ## Input checks do not authorize clinical use
 
-Candidate0.3.0 scoring requires complete, structurally valid inputs. It rejects
+Since 0.3.0, scoring requires complete, structurally valid inputs. It rejects
 missing/non-finite values, strings, temporal values, boolean measurements,
 non-binary flags, invalid CKM categories and invalid totals. It neither imputes
 missing values nor proves physiological plausibility or correct units. No new
@@ -93,10 +94,10 @@ describe simulated proxies and flags. A shared field name is not proof of
 matching encoding, clinical meaning, or successful institutional import.
 
 FHIR output is a plain R4 collection Bundle. A score is a point count, not a
-probability; the candidate expresses its tier qualitatively. No `meta.profile`
+probability; the exporter expresses its tier qualitatively. No `meta.profile`
 claim is emitted. JSON generation and local structural tests do not establish
 full terminology/profile conformance, EHR acceptance, or a lossless exchange.
-The candidate mapping withdraws inferred ICD diagnoses, drug-specific RxNorm
+The 0.3.x mapping withdraws inferred ICD diagnoses, drug-specific RxNorm
 codes and formula-specific eGFR coding. Text-only simulated groups/class flags
 do not establish clinical diagnoses or medication receipt. Ten explicit Boolean
 criterion components use the existing BNP-only/legacy-proxy adapter; this is

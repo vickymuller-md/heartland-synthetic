@@ -14,11 +14,11 @@ const read = (path) => readFileSync(join(root, path), 'utf8');
 const compiled = ts.transpileModule(read('lib/release.ts'), { compilerOptions: { module: ts.ModuleKind.ESNext } }).outputText;
 const release = await import(`data:text/javascript;base64,${Buffer.from(compiled).toString('base64')}`);
 
-test('published install identity stays separate from the source candidate', () => {
-  assert.equal(release.CANDIDATE_VERSION, '0.3.0');
-  assert.equal(release.PUBLISHED_VERSION, '0.2.2');
-  assert.equal(release.INSTALL_COMMAND, 'pip install heartland-synthetic==0.2.2');
-  assert.match(read('../pyproject.toml'), /version = "0\.3\.0"/);
+test('published identity matches verified release and stays separate from the benchmark', () => {
+  assert.equal(release.PUBLISHED_VERSION, '0.3.0');
+  assert.equal(release.SOFTWARE_ARCHIVE_DOI, 'https://doi.org/10.5281/zenodo.23050640');
+  assert.equal(release.INSTALL_COMMAND, `pip install heartland-synthetic==${release.PUBLISHED_VERSION}`);
+  assert.match(read('../pyproject.toml'), /version = "0\.3\.1"/);
   assert.match(read('app/page.tsx'), /Three versions, three different artifacts/);
 });
 
@@ -97,14 +97,16 @@ test('code samples offer keyboard scroll regions', () => {
 });
 
 // These assertions intentionally require a fresh production build; absent/stale HTML is not a skip.
-test('built home includes the candidate boundary, published pin and all three artifact labels', () => {
+test('built home includes the clinical boundary, published pin and all three artifact labels', () => {
   const html = read('out/index.html');
   const text = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ');
-  for (const expected of ['Published package', 'Source candidate', 'Preserved benchmark', 'Original provenance cites the v0.2.1 archive', release.INSTALL_COMMAND, 'pending validation', 'Copy command']) {
+  for (const expected of ['Published package', 'Archived source', 'Preserved benchmark', 'Original provenance cites the v0.2.1 archive', release.INSTALL_COMMAND, 'pending validation', 'Copy command']) {
     assert.ok(text.includes(expected), `Missing rendered text: ${expected}`);
   }
   assert.doesNotMatch(text, /clinically.realistic|Not a medical device|no PHI, by design/i);
   assert.match(html, /href="\/dataset\/"/);
+  assert.ok(html.includes(`href="${release.SOFTWARE_ARCHIVE_DOI}"`));
+  assert.doesNotMatch(text, /Source candidate|0\.2\.2|0\.3\.0 candidate/);
 });
 
 test('built dataset structured metadata keeps original identity and CSV hash', () => {

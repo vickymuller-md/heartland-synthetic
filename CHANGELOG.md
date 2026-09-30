@@ -4,10 +4,23 @@ All notable changes to `heartland-synthetic` are documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 versions follow [SemVer](https://semver.org/).
 
-## [0.3.0] - Unreleased candidate
+## [0.3.1] - 2026-09-30
 
-Initially prepared 2026-09-17; further local hardening 2026-09-29. The
-version number in source is not evidence of a PyPI, GitHub, or Zenodo release.
+### Fixed
+- Correct release and installation documentation after publication of 0.3.0;
+  its immutable distributions retain their original candidate-era README.
+- Pin the installation example to this maintenance version and test agreement
+  with the package version, while requiring independent registry readback.
+- Keep published software, archived source and the preserved dataset separate.
+  No generator, scoring, exporter, dependency or clinical rule changes. The
+  dataset v1.0.0 CSV and its original v0.2.1 provenance remain unchanged.
+
+## [0.3.0] - 2026-09-30
+
+Prepared 2026-09-17 and hardened 2026-09-29; GitHub, PyPI and Zenodo
+publication verified 2026-09-30 UTC. Source archive:
+[10.5281/zenodo.23050640](https://doi.org/10.5281/zenodo.23050640).
+The candidate-era descriptions below document preparation, not current availability.
 
 ### Fixed
 - Benchmark provenance again cites the original v0.2.1 software archive,

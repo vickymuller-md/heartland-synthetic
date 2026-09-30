@@ -65,7 +65,7 @@ const FEATURES: Feature[] = [
   },
   {
     title: "FHIR R4 bundles",
-    body: "R4 collection examples with patient, condition, observation and medication statements. The candidate adds qualitative risk, without a probability or profile-conformance claim. Terminology and recipient acceptance require separate verification.",
+    body: "R4 collection examples with patient, observation and medication statements. Since 0.3.0, risk is qualitative, without a probability or profile-conformance claim. Terminology and recipient acceptance require separate verification.",
     icon: <Glyph d="M 6 4 H 18 V 20 H 6 Z M 6 9 H 18 M 12 4 V 20" />,
     available: true,
   },

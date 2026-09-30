@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "heartland-synthetic"
-version = "0.3.0"
+version = "0.3.1"
 description = "Synthetic heart-failure cohorts for research and software testing, with modeled rural access, social-support proxy, and proposed HEARTLAND risk variables."
 readme = "README.md"
 requires-python = ">=3.10"

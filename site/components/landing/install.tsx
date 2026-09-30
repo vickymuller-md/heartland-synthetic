@@ -2,7 +2,7 @@
  * Install CTA — pip block + a minimal usage snippet. Mono style picks up
  * the Sora mono-editorial variable from layout.
  */
-import { INSTALL_COMMAND, PUBLISHED_VERSION, CANDIDATE_VERSION } from "@/lib/release";
+import { INSTALL_COMMAND, PUBLISHED_VERSION, SOFTWARE_ARCHIVE_DOI } from "@/lib/release";
 
 export function Install() {
   return (
@@ -24,9 +24,9 @@ export function Install() {
             </h2>
             <p className="mt-6 max-w-md font-editorial text-[15.5px] leading-relaxed text-cool/70">
               Python 3.10+ with NumPy, pandas and SciPy. The command pins
-              published v{PUBLISHED_VERSION}; it does not install candidate
-              v{CANDIDATE_VERSION}. Candidate input checks require a reviewed
-              source checkout. No GPU or server runtime is required.
+              published v{PUBLISHED_VERSION}, including the 0.3.x structural input
+              and export checks. Those checks do not authorize patient care.
+              No GPU or server runtime is required.
             </p>
 
             <div className="mt-8 space-y-2 font-editorial text-[13px] text-cool/70">
@@ -55,12 +55,12 @@ export function Install() {
               <p>
                 <span className="text-stone">Cite:</span>{" "}
                 <a
-                  href="https://doi.org/10.5281/zenodo.19635042"
+                  href={SOFTWARE_ARCHIVE_DOI}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="underline decoration-dotted underline-offset-4 hover:text-alert"
                 >
-                  Zenodo software DOI
+                  Zenodo software v{PUBLISHED_VERSION}
                 </a>
               </p>
             </div>

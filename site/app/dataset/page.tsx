@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { SYNTHETIC_BOUNDARY } from "@/lib/release";
+import { PUBLISHED_VERSION, SYNTHETIC_BOUNDARY } from "@/lib/release";
 import { Colophon, Masthead } from "@heartland/ui";
 
 const SITE_URL = "https://synthetic.heartlandprotocol.org";
@@ -10,7 +10,7 @@ const GENERATOR_VERSION_DOI = "https://doi.org/10.5281/zenodo.19635043";
 const GENERATOR_CONCEPT_DOI = "https://doi.org/10.5281/zenodo.19635042";
 const TECHNICAL_REPORT_DOI = "https://doi.org/10.5281/zenodo.22137199";
 const PROTOCOL_DOI = "https://doi.org/10.5281/zenodo.19101219";
-const PYPI_URL = "https://pypi.org/project/heartland-synthetic/0.2.2/";
+const PYPI_URL = `https://pypi.org/project/heartland-synthetic/${PUBLISHED_VERSION}/`;
 const HUGGING_FACE_URL =
   "https://huggingface.co/datasets/vickymuller-md/heartland-synthetic";
 const RELEASE_URL =
@@ -38,7 +38,7 @@ const datasetStructuredData = {
   name: "HEARTLAND Synthetic Heart-Failure Benchmark Cohort",
   alternateName: "HEARTLAND Synthetic HF Cohort — 1,000 rows, seed 42",
   description:
-    "Preserved benchmark dataset v1.0.0 containing 1,000 synthetic adult heart-failure records and 31 variables, with recorded seed 42. Original provenance cites the v0.2.1 software archive; the original runtime receipt is unavailable and byte-identical regeneration is not promised. Includes simulated demographics, access, clinical variables, legacy social-support and staging proxies, medication-class flags, proposed HEARTLAND point tiers, and assumed one-year outcomes. It contains no real patient records or geo-accurate county identifiers. Its fixed outcome settings cannot validate the score that selects them. A new software candidate does not replace this CSV or its original provenance.",
+    "Preserved benchmark dataset v1.0.0 containing 1,000 synthetic adult heart-failure records and 31 variables, with recorded seed 42. Original provenance cites the v0.2.1 software archive; the original runtime receipt is unavailable and byte-identical regeneration is not promised. Includes simulated demographics, access, clinical variables, legacy social-support and staging proxies, medication-class flags, proposed HEARTLAND point tiers, and assumed one-year outcomes. It contains no real patient records or geo-accurate county identifiers. Its fixed outcome settings cannot validate the score that selects them. A new software release does not replace this CSV or its original provenance.",
   url: DATASET_URL,
   mainEntityOfPage: DATASET_URL,
   version: "1.0.0",
@@ -169,7 +169,7 @@ export default function DatasetPage() {
             </p>
             <p className="mt-5 max-w-3xl font-editorial text-[15px] leading-relaxed text-cool/75">
               Original provenance cites the v0.2.1 software archive. The software
-              candidate v0.3.0 does not regenerate or rename this CSV.
+              release v{PUBLISHED_VERSION} does not regenerate or rename this CSV.
               Social support and staging are legacy simulation proxies; event
               probabilities are assumptions, not observed outcomes.
             </p>
@@ -296,7 +296,7 @@ export default function DatasetPage() {
               { label: "Download CSV", href: DOWNLOAD_PATH, external: false },
               { label: "Originally cited archive", href: GENERATOR_VERSION_DOI, external: true },
               { label: "Technical report", href: TECHNICAL_REPORT_DOI, external: true },
-              { label: "PyPI v0.2.2", href: PYPI_URL, external: true },
+              { label: `PyPI v${PUBLISHED_VERSION} (separate software)`, href: PYPI_URL, external: true },
               { label: "Hugging Face", href: HUGGING_FACE_URL, external: true },
               { label: "GitHub release", href: RELEASE_URL, external: true },
               { label: "Software Heritage", href: "https://archive.softwareheritage.org/swh:1:snp:53d48ef3e36293ebabf274cb8db4b35cb55a30d7/", external: true },

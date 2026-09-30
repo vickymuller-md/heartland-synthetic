@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from heartland_synthetic import HeartlandCohortConfig, generate_cohort, generate_time_series
+from heartland_synthetic import __version__, HeartlandCohortConfig, generate_cohort, generate_time_series
 from heartland_synthetic.registries import OUTCOME_RATES, ESSI_CLIP, ESSI_LIMITED_CUTOFF
 
 
@@ -76,10 +76,14 @@ def test_public_package_descriptions_do_not_claim_empirical_calibration_or_exclu
             assert claim not in content
 
 
-def test_install_and_release_instructions_distinguish_candidate():
+def test_install_and_release_instructions_match_version_without_relabelling_benchmark():
     readme = (ROOT / "README.md").read_text()
-    assert "pip install heartland-synthetic==0.2.2" in readme
-    assert "**0.3.0 candidate**" in readme
-    assert "not the local candidate" in readme
+    assert f"pip install heartland-synthetic=={__version__}" in readme
+    assert f"Release line: {__version__}" in readme
+    assert "documentation maintenance" in readme
+    assert "not a publication receipt" in readme
+    assert "23050640" in readme
+    assert "preserved benchmark remains dataset v1.0.0" in readme
+    assert "**0.3.0 candidate**" not in readme
     assert "git push --tags" not in readme
     assert "twine upload dist/*" not in readme
