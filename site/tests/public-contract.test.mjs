@@ -15,8 +15,8 @@ const compiled = ts.transpileModule(read('lib/release.ts'), { compilerOptions: {
 const release = await import(`data:text/javascript;base64,${Buffer.from(compiled).toString('base64')}`);
 
 test('published identity matches verified release and stays separate from the benchmark', () => {
-  assert.equal(release.PUBLISHED_VERSION, '0.3.0');
-  assert.equal(release.SOFTWARE_ARCHIVE_DOI, 'https://doi.org/10.5281/zenodo.23050640');
+  assert.equal(release.PUBLISHED_VERSION, '0.3.1');
+  assert.equal(release.SOFTWARE_ARCHIVE_DOI, 'https://doi.org/10.5281/zenodo.23051476');
   assert.equal(release.INSTALL_COMMAND, `pip install heartland-synthetic==${release.PUBLISHED_VERSION}`);
   assert.match(read('../pyproject.toml'), /version = "0\.3\.1"/);
   assert.match(read('app/page.tsx'), /Three versions, three different artifacts/);

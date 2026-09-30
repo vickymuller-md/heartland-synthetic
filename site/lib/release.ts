@@ -1,6 +1,6 @@
 // Update published identity only after registry readback, never from source version alone.
-export const PUBLISHED_VERSION = "0.3.0";
-export const SOFTWARE_ARCHIVE_DOI = "https://doi.org/10.5281/zenodo.23050640";
+export const PUBLISHED_VERSION = "0.3.1";
+export const SOFTWARE_ARCHIVE_DOI = "https://doi.org/10.5281/zenodo.23051476";
 export const RELEASE_CHECK_DATE = "2026-09-30";
 export const INSTALL_COMMAND = `pip install heartland-synthetic==${PUBLISHED_VERSION}`;
 export const SYNTHETIC_DESCRIPTION =
