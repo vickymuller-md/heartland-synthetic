@@ -19,8 +19,9 @@ interoperability. Do not supply real patient, personal, or health information.
 **Release status (checked 2026-09-29):** source is a **0.3.0 candidate**;
 [PyPI currently publishes 0.2.2](https://pypi.org/project/heartland-synthetic/0.2.2/).
 Candidate input checks and export changes are not included in that published
-version. The preserved benchmark remains dataset v1.0.0, generated with 0.2.2;
-it is not renamed or regenerated when the software changes.
+version. The preserved benchmark remains dataset v1.0.0; its original
+provenance cites the v0.2.1 software archive, not the later PyPI release.
+It is not renamed or regenerated when the software changes.
 
 ## Why this exists
 
@@ -346,8 +347,13 @@ assert generate_cohort(cfg).equals(generate_cohort(cfg))
 The public 1,000-row, seed-42 benchmark cohort is available from the
 [dataset landing page](https://synthetic.heartlandprotocol.org/dataset/) and
 [Hugging Face](https://huggingface.co/datasets/vickymuller-md/heartland-synthetic).
-It is reproducible with heartland-synthetic v0.2.2 and contains no real patient
-data or protected health information.
+Its original provenance cites the [v0.2.1 software archive](https://doi.org/10.5281/zenodo.19635043).
+That archive retained internal version metadata of 0.2.0; neither that metadata
+nor the later 0.2.2 packaging release proves the original execution environment.
+The original Python/dependency receipt is unavailable, so byte-identical
+regeneration is not promised. Download the preserved CSV and verify SHA-256
+`8fbce909272274129f94db2b80b179b493e64fbc382a88515a851089b2edda8e`.
+It contains no real patient data or protected health information.
 
 ## Citation
 

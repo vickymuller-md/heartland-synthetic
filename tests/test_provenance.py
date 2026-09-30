@@ -23,7 +23,10 @@ def test_frozen_benchmark_is_not_regenerated_or_relabelled():
     assert len(rows[0]) == 31
     ledger = (ROOT / "docs/model_assumptions.md").read_text()
     assert "Dataset v1.0.0" in ledger
-    assert "generator0.2.2" in ledger
+    assert "original provenance cites the v0.2.1 software archive" in ledger
+    assert "19635043" in ledger
+    assert "byte-identical regeneration is not promised" in ledger
+    assert "generator0.2.2" not in ledger
     assert "1,000 rows/31 columns" in ledger
 
 
@@ -65,6 +68,8 @@ def test_public_package_descriptions_do_not_claim_empirical_calibration_or_exclu
     text = metadata["description"]
     assert "simulation assumptions" in text
     assert "not an ESSI implementation" in text
+    assert "original provenance cites the v0.2.1 software archive" in text
+    assert "generated with software v0.2.2" not in text
     for path in ["README.md", "pyproject.toml", ".zenodo.json"]:
         content = (ROOT / path).read_text()
         for claim in ["clinically-realistic", "that Synthea does not model", "exact port", "never contains real patient data"]:

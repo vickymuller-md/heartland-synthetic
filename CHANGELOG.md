@@ -10,6 +10,11 @@ Initially prepared 2026-09-17; further local hardening 2026-09-29. The
 version number in source is not evidence of a PyPI, GitHub, or Zenodo release.
 
 ### Fixed
+- Benchmark provenance again cites the original v0.2.1 software archive,
+  independently of published package v0.2.2 and source candidate v0.3.0.
+  Documentation and dataset JSON-LD no longer assert generation by v0.2.2
+  or byte-identical regeneration without the original runtime receipt.
+  The dataset version, CSV bytes, hash, seed and recorded configuration remain unchanged.
 - Source distributions exclude local context/graph data and the website code.
   Exact archive inventories, bytes, metadata and wheel RECORD are checked
   before publishing; installed wheel/source tests replace checkout-only CI.

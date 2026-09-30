@@ -33,7 +33,8 @@ test('public copy avoids unsupported exclusivity, validation and regulatory clai
 test('download is the original benchmark with stable provenance', () => {
   assert.equal(createHash('sha256').update(readFileSync(join(root, 'public/data/heartland-synthetic-cohort-1000-seed42.csv'))).digest('hex'), '8fbce909272274129f94db2b80b179b493e64fbc382a88515a851089b2edda8e');
   assert.match(read('app/dataset/page.tsx'), /version: "1\.0\.0"/);
-  assert.match(read('app/dataset/page.tsx'), /generator v0\.2\.2 provenance/);
+  assert.match(read('app/dataset/page.tsx'), /Original provenance cites the v0\.2\.1 software archive/);
+  assert.doesNotMatch(read('app/dataset/page.tsx'), /generated with heartland-synthetic v0\.2\.2|Reproducible with the archived/);
 });
 
 // Narrow handler tests using the actual transpiled component with hook stubs.
@@ -99,7 +100,7 @@ test('code samples offer keyboard scroll regions', () => {
 test('built home includes the candidate boundary, published pin and all three artifact labels', () => {
   const html = read('out/index.html');
   const text = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ');
-  for (const expected of ['Published package', 'Source candidate', 'Preserved benchmark', release.INSTALL_COMMAND, 'pending validation', 'Copy command']) {
+  for (const expected of ['Published package', 'Source candidate', 'Preserved benchmark', 'Original provenance cites the v0.2.1 archive', release.INSTALL_COMMAND, 'pending validation', 'Copy command']) {
     assert.ok(text.includes(expected), `Missing rendered text: ${expected}`);
   }
   assert.doesNotMatch(text, /clinically.realistic|Not a medical device|no PHI, by design/i);
@@ -113,7 +114,13 @@ test('built dataset structured metadata keeps original identity and CSV hash', (
   const dataset = JSON.parse(json[1]);
   assert.equal(dataset.version, '1.0.0');
   assert.equal(dataset.distribution[0].sha256, '8fbce909272274129f94db2b80b179b493e64fbc382a88515a851089b2edda8e');
-  assert.match(dataset.description, /heartland-synthetic v0\.2\.2/);
+  assert.match(dataset.description, /Original provenance cites the v0\.2\.1 software archive/);
+  assert.match(dataset.description, /byte-identical regeneration is not promised/);
+  assert.deepEqual(dataset.isBasedOn, ['https://doi.org/10.5281/zenodo.19635043', 'https://github.com/vickymuller-md/heartland-synthetic/releases/tag/v0.2.1']);
+  const text = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ');
+  assert.match(text, /Original provenance cites the v0\.2\.1 software archive/);
+  assert.match(text, /byte-identical regeneration is not promised/);
+  assert.doesNotMatch(text, /generator v0\.2\.2 provenance|Reproducible with the archived/);
   assert.match(dataset.description, /fixed outcome settings cannot validate/);
   assert.equal(createHash('sha256').update(readFileSync(join(root, 'out/data/heartland-synthetic-cohort-1000-seed42.csv'))).digest('hex'), dataset.distribution[0].sha256);
 });

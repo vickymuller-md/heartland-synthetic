@@ -11,7 +11,7 @@ framework remains pending validation against clinical outcomes.
 |-|-|-|
 | Published Python package | 0.2.2 on PyPI, checked 2026-09-29 | A downloadable historical release, not the current candidate |
 | Local Python candidate | 0.3.0 in source | Export and input-boundary changes under review, not a publication receipt |
-| Preserved benchmark | Dataset v1.0.0, 1,000 rows/31 columns, generator0.2.2, seed42 | A fixed synthetic artifact; no new cohort or observed clinical outcomes |
+| Preserved benchmark | Dataset v1.0.0, 1,000 rows/31 columns, seed42; original provenance cites the v0.2.1 software archive | A fixed synthetic artifact; no new cohort or observed clinical outcomes |
 
 The software concept DOI is `10.5281/zenodo.19635042`. The technical report has
 its own concept DOI `10.5281/zenodo.22137199` and archived version1.0
@@ -21,6 +21,17 @@ Historical records must not be described as documenting changes made later.
 Frozen CSV: `site/public/data/heartland-synthetic-cohort-1000-seed42.csv`.
 SHA-256: `8fbce909272274129f94db2b80b179b493e64fbc382a88515a851089b2edda8e`.
 New generator development must not silently replace this file.
+
+The [original dataset commit](https://github.com/vickymuller-md/heartland-synthetic/commit/a9ec50bebe28048858c99873c41accf8fa419dcd)
+cites software archive [v0.2.1](https://doi.org/10.5281/zenodo.19635043).
+The archived source retained internal version metadata of 0.2.0; v0.2.2 later
+corrected packaging metadata. This inconsistency must not be resolved by
+inventing which runtime produced the CSV. The original Python/dependency
+receipt is unavailable; byte-identical regeneration is not promised.
+The fixed CSV and its hash establish artifact identity, not the original
+runtime or clinical validity. Readback on 2026-09-29 found identical bytes
+in the local file, public site and Hugging Face revision
+`0bb01f93479d40f9986aaee35d4ff1b261db312a`.
 
 ## Implemented model, not clinical calibration
 

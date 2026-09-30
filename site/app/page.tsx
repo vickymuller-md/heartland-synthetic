@@ -40,7 +40,7 @@ export default function Home() {
               {[
                 ["Published package", `v${PUBLISHED_VERSION}`, "The pinned install command downloads this historical PyPI release."],
                 ["Source candidate", `v${CANDIDATE_VERSION}`, "Input checks and export changes under review. Not yet a publication receipt."],
-                ["Preserved benchmark", "dataset v1.0.0", "1,000 synthetic rows, generator v0.2.2, seed 42. Original CSV unchanged."],
+                ["Preserved benchmark", "dataset v1.0.0", "1,000 synthetic rows, seed 42. Original provenance cites the v0.2.1 archive; CSV unchanged."],
               ].map(([label, value, note]) => (
                 <div key={label} className="min-w-0 rounded-2xl border border-grid bg-terminal p-6">
                   <dt className="text-sm text-cool/70">{label}</dt>

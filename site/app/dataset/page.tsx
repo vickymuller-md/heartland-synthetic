@@ -6,7 +6,7 @@ const SITE_URL = "https://synthetic.heartlandprotocol.org";
 const DATASET_URL = `${SITE_URL}/dataset`;
 const DOWNLOAD_PATH = "/data/heartland-synthetic-cohort-1000-seed42.csv";
 const DOWNLOAD_URL = `${SITE_URL}${DOWNLOAD_PATH}`;
-const GENERATOR_VERSION_DOI = "https://doi.org/10.5281/zenodo.22086443";
+const GENERATOR_VERSION_DOI = "https://doi.org/10.5281/zenodo.19635043";
 const GENERATOR_CONCEPT_DOI = "https://doi.org/10.5281/zenodo.19635042";
 const TECHNICAL_REPORT_DOI = "https://doi.org/10.5281/zenodo.22137199";
 const PROTOCOL_DOI = "https://doi.org/10.5281/zenodo.19101219";
@@ -14,12 +14,12 @@ const PYPI_URL = "https://pypi.org/project/heartland-synthetic/0.2.2/";
 const HUGGING_FACE_URL =
   "https://huggingface.co/datasets/vickymuller-md/heartland-synthetic";
 const RELEASE_URL =
-  "https://github.com/vickymuller-md/heartland-synthetic/releases/tag/v0.2.2";
+  "https://github.com/vickymuller-md/heartland-synthetic/releases/tag/v0.2.1";
 
 export const metadata: Metadata = {
   title: "HEARTLAND Synthetic HF Benchmark Cohort",
   description:
-    "A reproducible 1,000-row synthetic heart-failure benchmark cohort generated with heartland-synthetic using seed 42. No real patient data or PHI.",
+    "Preserved 1,000-row synthetic heart-failure benchmark, seed 42. Original provenance cites the v0.2.1 software archive; verify the fixed CSV hash. No real patient records.",
   alternates: { canonical: DATASET_URL },
   robots: { index: true, follow: true },
   openGraph: {
@@ -38,7 +38,7 @@ const datasetStructuredData = {
   name: "HEARTLAND Synthetic Heart-Failure Benchmark Cohort",
   alternateName: "HEARTLAND Synthetic HF Cohort — 1,000 rows, seed 42",
   description:
-    "Preserved benchmark dataset v1.0.0 containing 1,000 synthetic adult heart-failure records and 31 variables, generated with heartland-synthetic v0.2.2 and seed 42. Includes simulated demographics, access, clinical variables, legacy social-support and staging proxies, medication-class flags, proposed HEARTLAND point tiers, and assumed one-year outcomes. It contains no real patient records or geo-accurate county identifiers. Its fixed outcome settings cannot validate the score that selects them. A new software candidate does not replace this CSV or its original provenance.",
+    "Preserved benchmark dataset v1.0.0 containing 1,000 synthetic adult heart-failure records and 31 variables, with recorded seed 42. Original provenance cites the v0.2.1 software archive; the original runtime receipt is unavailable and byte-identical regeneration is not promised. Includes simulated demographics, access, clinical variables, legacy social-support and staging proxies, medication-class flags, proposed HEARTLAND point tiers, and assumed one-year outcomes. It contains no real patient records or geo-accurate county identifiers. Its fixed outcome settings cannot validate the score that selects them. A new software candidate does not replace this CSV or its original provenance.",
   url: DATASET_URL,
   mainEntityOfPage: DATASET_URL,
   version: "1.0.0",
@@ -92,7 +92,7 @@ const datasetStructuredData = {
     "HEARTLAND risk score and tier",
     "Modeled one-year mortality and hospitalization outcomes",
   ],
-  isBasedOn: [GENERATOR_VERSION_DOI, RELEASE_URL, PYPI_URL],
+  isBasedOn: [GENERATOR_VERSION_DOI, RELEASE_URL],
   citation: [GENERATOR_CONCEPT_DOI, TECHNICAL_REPORT_DOI, PROTOCOL_DOI],
   distribution: [
     {
@@ -114,7 +114,7 @@ const configuration = [
   ["Modeled rural fraction", "70%"],
   ["Age range", "45–95 years"],
   ["HF phenotype mix", "45% HFrEF · 15% HFmrEF · 40% HFpEF"],
-  ["Generator archive", "heartland-synthetic v0.2.2"],
+  ["Originally cited archive", "heartland-synthetic v0.2.1"],
 ] as const;
 
 export default function DatasetPage() {
@@ -168,7 +168,7 @@ export default function DatasetPage() {
               included.
             </p>
             <p className="mt-5 max-w-3xl font-editorial text-[15px] leading-relaxed text-cool/75">
-              Dataset v1.0.0 retains generator v0.2.2 provenance. The software
+              Original provenance cites the v0.2.1 software archive. The software
               candidate v0.3.0 does not regenerate or rename this CSV.
               Social support and staging are legacy simulation proxies; event
               probabilities are assumptions, not observed outcomes.
@@ -187,7 +187,7 @@ export default function DatasetPage() {
                 rel="noopener noreferrer"
                 className="rounded-full border border-grid bg-panel px-6 py-3 font-editorial text-[14px] font-medium text-cool transition-colors hover:border-cool/40"
               >
-                Generator v0.2.2 DOI ↗
+                Original v0.2.1 archive DOI ↗
               </a>
               <a
                 href={TECHNICAL_REPORT_DOI}
@@ -205,7 +205,7 @@ export default function DatasetPage() {
           <div className="mx-auto grid max-w-[1000px] gap-10 px-6 py-20 md:grid-cols-2 md:py-24">
             <div>
               <p className="font-editorial text-[12.5px] uppercase tracking-[0.18em] text-alert">
-                Reproduction configuration
+                Recorded configuration
               </p>
               <dl className="mt-6 divide-y divide-grid border-y border-grid">
                 {configuration.map(([label, value]) => (
@@ -245,15 +245,17 @@ export default function DatasetPage() {
               Provenance and integrity
             </p>
             <h2 className="mt-4 font-editorial text-3xl font-semibold text-cool">
-              Deterministic generation, traceable source
+              Preserved file, traceable attribution
             </h2>
             <div className="mt-6 grid gap-6 font-editorial text-[14.5px] leading-relaxed text-cool/75 md:grid-cols-2">
               <p>
-                Reproducible with the archived heartland-synthetic v0.2.2
-                release using the fixed seed and configuration shown above. The
-                Zenodo DOI identifies the generator archive; it is cited as
-                provenance and is not presented as a DOI minted specifically for
-                this CSV.
+                The original dataset page cited the v0.2.1 software archive,
+                whose internal version metadata remained 0.2.0. The later
+                v0.2.2 package corrected that metadata. The original runtime
+                receipt is unavailable; byte-identical regeneration is not
+                promised. The DOI identifies a software archive, not a record
+                minted specifically for this CSV. Download the preserved file
+                and verify its hash.
               </p>
               <p>
                 SHA-256: <code className="break-all font-mono text-[12px] text-cool">8fbce909272274129f94db2b80b179b493e64fbc382a88515a851089b2edda8e</code>
@@ -285,14 +287,14 @@ export default function DatasetPage() {
       <Colophon
         currentSite="synthetic"
         version="dataset v1.0.0"
-        description="Open, reproducible synthetic heart-failure benchmark cohort. No real patient data or PHI."
+        description="Preserved synthetic heart-failure benchmark with a fixed file hash. No real patient data or PHI."
         legal={SYNTHETIC_BOUNDARY}
         extraBlocks={[
           {
             title: "Dataset",
             links: [
               { label: "Download CSV", href: DOWNLOAD_PATH, external: false },
-              { label: "Generator DOI", href: GENERATOR_VERSION_DOI, external: true },
+              { label: "Originally cited archive", href: GENERATOR_VERSION_DOI, external: true },
               { label: "Technical report", href: TECHNICAL_REPORT_DOI, external: true },
               { label: "PyPI v0.2.2", href: PYPI_URL, external: true },
               { label: "Hugging Face", href: HUGGING_FACE_URL, external: true },
