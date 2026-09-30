@@ -4,14 +4,85 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_call:
+    inputs:
+      release_tag:
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
 
 jobs:
-  test:
+  build:
+    name: Build and inspect exact distributions
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
-      - run: pip install -e ".[dev]"
-      - run: pytest -q
+          python-version: "3.12"
+      - name: Prepare isolated runner verification tools
+        run: python -m pip install build twine packaging
+      - name: Verify version locations and optional release tag
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          python - <<'PY'
+          import os
+          from scripts.verify_distributions import package_version
+          expected = f"v{package_version()}"
+          actual = os.environ.get("RELEASE_TAG", "")
+          if actual and actual != expected:
+              raise SystemExit(f"Release tag {actual!r} does not match {expected!r}")
+          PY
+      - name: Build wheel from source distribution and inspect both
+        run: |
+          python -m build --outdir dist
+          python -m twine check dist/*
+          python scripts/verify_distributions.py dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+          if-no-files-found: error
+
+  installed:
+    name: Installed ${{ matrix.distribution }} on Python ${{ matrix.python }}
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.11", "3.12"]
+        distribution: [wheel, source]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+      - name: Install non-editably and test outside the checkout
+        env:
+          DISTRIBUTION_KIND: ${{ matrix.distribution }}
+          PYTHONNOUSERSITE: "1"
+        run: |
+          set -euo pipefail
+          unset PYTHONPATH
+          python -m venv "$RUNNER_TEMP/installed"
+          package_paths=( "$PWD"/dist/*.whl )
+          if [ "$DISTRIBUTION_KIND" = source ]; then
+            package_paths=( "$PWD"/dist/*.tar.gz )
+          fi
+          test "${#package_paths[@]}" -eq 1
+          "$RUNNER_TEMP/installed/bin/python" -m pip install "${package_paths[0]}[dev]"
+          "$RUNNER_TEMP/installed/bin/python" -m pip check
+          "$RUNNER_TEMP/installed/bin/python" scripts/verify_distributions.py dist
+          mkdir "$RUNNER_TEMP/installed-tests"
+          cd "$RUNNER_TEMP/installed-tests"
+          "$RUNNER_TEMP/installed/bin/python" "$GITHUB_WORKSPACE/scripts/verify_installed.py"
+          "$RUNNER_TEMP/installed/bin/python" -m pytest --import-mode=importlib -o pythonpath= "$GITHUB_WORKSPACE/tests" -q

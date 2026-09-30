@@ -10,6 +10,10 @@ Initially prepared 2026-09-17; further local hardening 2026-09-29. The
 version number in source is not evidence of a PyPI, GitHub, or Zenodo release.
 
 ### Fixed
+- Source distributions exclude local context/graph data and the website code.
+  Exact archive inventories, bytes, metadata and wheel RECORD are checked
+  before publishing; installed wheel/source tests replace checkout-only CI.
+  The publishing job consumes the same verified artifacts without rebuilding.
 - FHIR collection entry URLs are valid UUID URNs; all subject/basis references
   resolve to exact entries. Patient source ids and filenames remain unchanged.
 - FHIR blood pressure is now one LOINC 85354-9 panel with systolic/diastolic

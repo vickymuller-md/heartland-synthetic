@@ -417,6 +417,10 @@ release, review the exact commit and version in `pyproject.toml`, `__init__.py`,
 the changelog and site; run tests; verify the frozen CSV hash; build into a new
 empty output directory; inspect both wheel and source archive for unintended
 files; validate metadata and test an isolated installation of the built wheel.
+The [distribution-verification guide](docs/release_verification.md) describes
+the exact inventory checker, non-editable installed-package tests and release
+gates. CI tests wheel and source installations across Python 3.10–3.12; a local
+run only establishes the environments actually exercised in its receipt.
 
 The repository's release workflow uses PyPI Trusted Publishing. Review its
 tag/version and environment gates before creating a release, because a public
