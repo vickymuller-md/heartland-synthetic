@@ -285,9 +285,9 @@ REDCAP_CATEGORICALS = {
         "Other": "Other",
     },
     "hf_type": {
-        "hfref": "HFrEF (LVEF <40%)",
-        "hfmref": "HFmrEF (LVEF 40-49%)",
-        "hfpef": "HFpEF (LVEF >=50%)",
+        "hfref": "Simulated HFrEF group",
+        "hfmref": "Simulated HFmrEF group",
+        "hfpef": "Simulated HFpEF group",
     },
     "heartland_risk_tier": {
         "low": "Low (0-4)",
@@ -303,20 +303,21 @@ REDCAP_BOOLEAN_COLUMNS = {
 }
 
 REDCAP_DROPDOWNS = {
-    "rural_urban_code": {str(i): f"RUCA {i}" for i in range(1, 11)},
-    "ckd_stage": {str(i): f"Stage {i}" for i in range(1, 6)},
-    "ckm_stage": {str(i): f"Stage {i}" for i in range(0, 5)},
+    "rural_urban_code": {str(i): f"Modeled RUCA-like category {i}" for i in range(1, 11)},
+    "ckd_stage": {str(i): f"Simulated eGFR bin {i}" for i in range(1, 6)},
+    "ckm_stage": {str(i): f"Legacy simulated CKM category {i}" for i in range(0, 5)},
 }
 
 REDCAP_FIELD_LABELS = {
-    "patient_id": "Patient ID",
+    "patient_id": "Synthetic record ID",
+    "record_id": "Synthetic record ID",
     "age": "Age (years)",
     "sex": "Sex",
     "race": "Race/ethnicity",
     "state": "US state",
-    "county_fips": "County FIPS code (synthetic)",
-    "rural_urban_code": "USDA RUCA code",
-    "hf_type": "Heart failure type",
+    "county_fips": "Synthetic county identifier (not a real FIPS/GEOID)",
+    "rural_urban_code": "Modeled RUCA-like category",
+    "hf_type": "Simulated heart-failure phenotype group",
     "lvef": "LVEF (%)",
     "egfr": "eGFR (mL/min/1.73m^2)",
     "bnp": "BNP (pg/mL)",
@@ -326,20 +327,43 @@ REDCAP_FIELD_LABELS = {
     "bmi": "BMI (kg/m^2)",
     "diabetes": "Diabetes mellitus",
     "af": "Atrial fibrillation",
-    "ckd_stage": "CKD stage (KDIGO)",
-    "ckm_stage": "CKM stage (AHA 2023)",
-    "distance_to_cardiology_mi": "Distance to cardiology (miles)",
-    "social_support_score": "ENRICHD ESSI score (8-40)",
+    "ckd_stage": "Simulated eGFR bin (not a CKD diagnosis)",
+    "ckm_stage": "Legacy simulated CKM category (not adjudicated staging)",
+    "distance_to_cardiology_mi": "Modeled distance to cardiology (miles)",
+    "social_support_score": "Legacy social-support proxy (not an ESSI score)",
     "prior_hf_hosp_6mo": "Prior HF hospitalization (last 6mo)",
-    "on_acei_arb_arni": "On ACEi/ARB/ARNI",
-    "on_beta_blocker": "On beta-blocker",
-    "on_mra": "On mineralocorticoid receptor antagonist",
-    "on_sglt2i": "On SGLT2 inhibitor",
-    "gdmt_classes_count": "Number of GDMT classes",
-    "heartland_risk_score": "HEARTLAND risk score (0-18)",
-    "heartland_risk_tier": "HEARTLAND risk tier",
-    "mortality_1yr": "1-year mortality",
-    "hospitalization_1yr": "1-year hospitalization",
+    "on_acei_arb_arni": "Simulated ACEi/ARB/ARNI class flag",
+    "on_beta_blocker": "Simulated beta-blocker class flag",
+    "on_mra": "Simulated mineralocorticoid receptor antagonist class flag",
+    "on_sglt2i": "Simulated SGLT2 inhibitor class flag",
+    "gdmt_classes_count": "Sum of four simulated GDMT class flags",
+    "heartland_risk_score": "Proposed HEARTLAND point total (0-18)",
+    "heartland_risk_tier": "Proposed HEARTLAND point tier",
+    "mortality_1yr": "Simulated one-year mortality indicator",
+    "hospitalization_1yr": "Simulated one-year hospitalization indicator",
+}
+
+REDCAP_DEFAULT_NOTE = "Synthetic research/testing value; not a real patient observation."
+_MEDICATION_NOTE = (
+    "Simulated class flag, not a drug, dose, contraindication or receipt of treatment. "
+    "Zero may be a placeholder when medication sampling is disabled; do not infer assessed non-use."
+)
+REDCAP_FIELD_NOTES = {
+    "record_id": "Synthetic source identity retained from patient_id; do not supply real patient identifiers.",
+    "race": "One legacy variable mixes race and ethnicity. Do not infer one axis from the other or infer Not Hispanic.",
+    "county_fips": "Opaque simulated code; may collide with a real county. Do not decode, geolink or treat it as a ZIP code.",
+    "rural_urban_code": "Sampled category, not a USDA geographic lookup or actual area classification.",
+    "hf_type": "Assigned simulation group, not an adjudicated diagnosis or a separate recalculation from LVEF.",
+    "ckd_stage": "Derived simulation bin from eGFR; no chronicity or albuminuria assessment establishes CKD.",
+    "ckm_stage": "Legacy simulation category, not implementation of adjudicated AHA staging.",
+    "distance_to_cardiology_mi": "Assumed distance, not a route calculation, NPPES lookup or Atlas join.",
+    "social_support_score": "Generated as one value in 8-40, not questionnaire items or a validated ESSI instrument/cutoff. No mapping to bl_enrichd_score is established.",
+    **{field: _MEDICATION_NOTE for field in ("on_acei_arb_arni", "on_beta_blocker", "on_mra", "on_sglt2i")},
+    "gdmt_classes_count": "Arithmetic count of modeled flags, not optimization, eligibility or receipt of four therapies.",
+    "heartland_risk_score": "Ten weighted criteria using BNP and a legacy support proxy; points are not an outcome probability. Proposed pending validation.",
+    "heartland_risk_tier": "Point group only, not observed risk or an independently validated prediction.",
+    "mortality_1yr": "Bernoulli draw using assumed tier-selected probabilities. Not observed survival status/date; separate from monthly event draws.",
+    "hospitalization_1yr": "Binary Bernoulli draw, not an exact admission count. Separate from monthly event draws; cannot validate the score selecting its probability.",
 }
 
 
@@ -369,7 +393,7 @@ __all__ = [
     "OUTCOME_RATES", "TIMESERIES_PARAMS",
     # exports
     "FHIR_CODES", "REDCAP_CATEGORICALS", "REDCAP_BOOLEAN_COLUMNS",
-    "REDCAP_DROPDOWNS", "REDCAP_FIELD_LABELS",
+    "REDCAP_DROPDOWNS", "REDCAP_FIELD_LABELS", "REDCAP_FIELD_NOTES", "REDCAP_DEFAULT_NOTE",
     # misc
     "PRIOR_HF_HOSP_P",
 ]

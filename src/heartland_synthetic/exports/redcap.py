@@ -4,9 +4,9 @@ The output is a **standalone** single-form instrument (``heartland_cohort``)
 whose data dictionary is generated from the cohort columns, in the official
 18-column REDCap data dictionary layout. It is *not* an import file for the
 HEARTLAND REDCap Instrument Template (https://github.com/vickymuller-md/redcap-template),
-a separate 75-field, 5-form instrument using ``bl_*`` / ``gdmt_*`` / ``mo_*`` /
-``out_*`` field names. A field-level crosswalk between the two is in
-``docs/redcap_template_crosswalk.md``; no direct-import adapter is provided.
+a separately versioned instrument using ``bl_*`` / ``gdmt_*`` / ``mo_*`` /
+``out_*`` field names. Mapping limits and withdrawn historical assumptions are
+in ``docs/redcap_template_crosswalk.md``; no direct-import adapter is provided.
 """
 
 from __future__ import annotations
@@ -24,6 +24,8 @@ from heartland_synthetic.registries import (
     REDCAP_CATEGORICALS,
     REDCAP_DROPDOWNS,
     REDCAP_FIELD_LABELS,
+    REDCAP_FIELD_NOTES,
+    REDCAP_DEFAULT_NOTE,
 )
 
 INSTRUMENT_NAME = "heartland_cohort"
@@ -80,11 +82,11 @@ def _field_definition(column: str, series: pd.Series) -> dict[str, str]:
     return {
         "Variable / Field Name": column,
         "Form Name": INSTRUMENT_NAME,
-        "Section Header": "",
+        "Section Header": "Synthetic research/testing only; not clinical observations" if column == "record_id" else "",
         "Field Type": field_type,
         "Field Label": label,
         "Choices, Calculations, OR Slider Labels": choices,
-        "Field Note": "",
+        "Field Note": REDCAP_FIELD_NOTES.get(column, REDCAP_DEFAULT_NOTE),
         "Text Validation Type OR Show Slider Number": validation,
         "Text Validation Min": min_v,
         "Text Validation Max": max_v,

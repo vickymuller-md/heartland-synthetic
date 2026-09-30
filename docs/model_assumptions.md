@@ -76,8 +76,10 @@ and testing only, not diagnosis, prognosis, treatment, or patient care.
 
 `export_redcap` writes its own single-form dictionary/data pair. It is not a
 direct importer for the separately versioned HEARTLAND Template. The historical
-crosswalk predates the current Template candidate; a shared field name is not
-proof of matching encoding, clinical meaning, or successful institutional import.
+crosswalk has been replaced by explicit mapping limits: no ESSI/CKM/geography,
+drug/dose or outcome-count conversion is inferred. Dictionary labels/notes
+describe simulated proxies and flags. A shared field name is not proof of
+matching encoding, clinical meaning, or successful institutional import.
 
 FHIR output is a plain R4 collection Bundle. A score is a point count, not a
 probability; the candidate expresses its tier qualitatively. No `meta.profile`

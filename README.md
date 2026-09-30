@@ -253,10 +253,12 @@ It is **not** an import file for the
 which is a separately versioned instrument. This function is not a direct
 Template importer and does not prove compatibility with its current candidate.
 
-The historical crosswalk for the earlier 75-field/5-form Template is in
+The review of the historical crosswalk for the earlier 75-field/5-form Template is in
 [`docs/redcap_template_crosswalk.md`](docs/redcap_template_crosswalk.md).
-It is not a current conversion receipt; its instrument assumptions require
-reconciliation before using it with a newer Template.
+It withdraws unsupported ESSI, staging, geography, medication and outcome-count
+mappings. The standalone dictionary includes simulation labels/field notes;
+it does not convert source values into clinically adjudicated measurements.
+It is not a current conversion or institutional import receipt.
 
 ## FHIR R4 export
 

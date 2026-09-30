@@ -25,6 +25,10 @@ version number in source is not evidence of a PyPI, GitHub, or Zenodo release.
   duplicate/MultiIndex labels, empty tables, and input preservation.
 
 ### Changed
+- Standalone REDCap labels and notes identify simulated proxies, categories,
+  medication placeholders and assumed outcomes. The historical Template
+  crosswalk documents non-equivalence instead of unsupported conversions;
+  source values, choice codes, weights and clinical thresholds are unchanged.
 - Exporters validate the full cohort before writing, reject unsafe/duplicate
   identities and inconsistent totals, and refuse existing output targets.
   This intentionally tightens candidate input/file behavior; it does not prove
