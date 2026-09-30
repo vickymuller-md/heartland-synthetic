@@ -1,8 +1,7 @@
 # heartland-synthetic
 
-**Synthetic heart-failure cohort generator with the 10 HEARTLAND risk variables
-— distance-to-cardiology and social support — that Synthea and other generators
-do not model.**
+**Synthetic heart-failure cohorts with modeled rural access, social support,
+and the ten proposed HEARTLAND risk criteria.**
 
 [![CI](https://github.com/vickymuller-md/heartland-synthetic/actions/workflows/ci.yml/badge.svg)](https://github.com/vickymuller-md/heartland-synthetic/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/heartland-synthetic.svg)](https://pypi.org/project/heartland-synthetic/)
@@ -10,32 +9,38 @@ do not model.**
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 
-`heartland-synthetic` is a Python package that generates clinically-realistic
-synthetic HF patient cohorts, computes the HEARTLAND Risk Score for each row,
-and exports to REDCap and FHIR R4. It supports reproducible simulation studies
-for the HEARTLAND Protocol and lets other researchers prototype validation
-work without needing real patient data.
+`heartland-synthetic` generates simulated HF cohorts, computes a proposed
+HEARTLAND point score, and writes standalone REDCap and FHIR R4 collection
+exports. It supports research workflow development, software tests and
+educational demonstrations using synthetic data. It does not establish
+clinical realism, predictive validity, patient outcomes, or institutional
+interoperability. Do not supply real patient, personal, or health information.
+
+**Release status (checked 2026-09-29):** source is a **0.3.0 candidate**;
+[PyPI currently publishes 0.2.2](https://pypi.org/project/heartland-synthetic/0.2.2/).
+Candidate input checks and export changes are not included in that published
+version. The preserved benchmark remains dataset v1.0.0, generated with 0.2.2;
+it is not renamed or regenerated when the software changes.
 
 ## Why this exists
 
-Synthea and other synthetic-patient generators do not model the two variables
-that distinguish HEARTLAND from MAGGIC / GWTG-HF / SHFM:
+The package makes two modeled rural-HF domains explicit:
 
 - **Distance to cardiology care** (rural barrier)
 - **Social support** (a legacy synthetic numeric proxy, not an ESSI instrument)
 
-Researchers working on rural HF risk stratification have had to simulate these
-manually. `heartland-synthetic` exposes these modeled variables and the point
-weights used in the HEARTLAND clinical implementation companion, and is publishable as a
-citeable artifact under MIT + Zenodo DOI.
+Researchers can inspect the simulation assumptions and point weights used by
+the HEARTLAND clinical implementation companion. This is not a benchmark
+establishing superiority or exclusivity over other generators or risk models.
 
 ## Install
 
 ```bash
-pip install heartland-synthetic
+pip install heartland-synthetic==0.2.2
 ```
 
-Editable install for development:
+That command installs the published version, not the local candidate.
+For a reviewed source checkout, use an editable development install:
 
 ```bash
 git clone https://github.com/vickymuller-md/heartland-synthetic
@@ -77,7 +82,7 @@ HEARTLAND score and tier already computed.
 | `age_range` | `(45, 95)` | Inclusive age bounds (min >= 18) |
 | `female_fraction` | `0.48` | Share of female patients |
 | `include_outcomes` | `True` | Attach `mortality_1yr` / `hospitalization_1yr` |
-| `include_medications` | `True` | Attach GDMT utilization columns |
+| `include_medications` | `True` | Sample GDMT flags; if False, retain columns as simulation zeros |
 | `seed` | `None` | Integer seed; `None` yields OS-entropy randomness |
 
 ## Output schema
@@ -98,8 +103,8 @@ HEARTLAND score and tier already computed.
 | `sbp`, `dbp`, `hr` | int | mmHg / mmHg / bpm |
 | `bmi` | float | kg/m^2 |
 | `diabetes`, `af` | int | 0/1 |
-| `ckd_stage` | int | 1-5 (KDIGO) |
-| `ckm_stage` | int | 0-4 (AHA 2023) |
+| `ckd_stage` | int | eGFR-derived 1-5 bin; not a clinical CKD diagnosis |
+| `ckm_stage` | int | Legacy 0-4 simulation category; not adjudicated AHA CKM staging |
 | `distance_to_cardiology_mi` | float | Miles |
 | `social_support_score` | int | Legacy synthetic proxy, generated range 8-40; not an ESSI scale |
 | `prior_hf_hosp_6mo` | int | 0/1 |
@@ -109,9 +114,15 @@ HEARTLAND score and tier already computed.
 | `heartland_risk_tier` | str | `low` / `moderate` / `high` |
 | `mortality_1yr`, `hospitalization_1yr` | int | 0/1 (only if `include_outcomes=True`) |
 
-## Distribution sources
+## Model assumptions and background literature
 
-| Variable | Model | Source |
+The named studies provide background context, not proof that the numerical
+settings below were extracted from or fitted to those studies. No calibration
+dataset, parameter-estimation procedure, or clinical validation is supplied.
+See [the model-assumptions ledger](docs/model_assumptions.md) for the code
+paths, limitations and separate version histories.
+
+| Variable | Implemented model | Background context / evidence boundary |
 |-|-|-|
 | Age | Truncated Normal(72, 12) | GWTG-HF |
 | Sex | Bernoulli | GWTG-HF |
@@ -125,16 +136,19 @@ HEARTLAND score and tier already computed.
 | BMI | Normal(30, 6); HFpEF +3 | DELIVER |
 | Diabetes | Bernoulli(0.42 + HFpEF/obesity bumps) | GWTG-HF |
 | AF | Bernoulli(0.35 + elderly bump) | GWTG-HF |
-| CKD stage | Deterministic from eGFR | KDIGO 2012 |
-| CKM stage | Cascade on diabetes, CKD, BMI, age | AHA 2023 Presidential Advisory |
-| Distance to cardiology | LogNormal (rural vs urban) | NPPES NPI / Atlas |
+| CKD stage | Deterministic eGFR bin | KDIGO terminology only; no chronicity/albuminuria assessment |
+| CKM stage | Legacy cascade on diabetes, CKD bin, BMI, age | Not an implementation of clinical AHA staging |
+| Distance to cardiology | Assumed LogNormal (rural vs urban) | No NPPES lookup, routing, or Atlas join |
 | Social support | Normal (rural 24, urban 29), rounded and clipped to 8-40 | Legacy simulation assumption, not an ESSI implementation |
-| GDMT rates | Bernoulli, rural vs urban | CHAMP-HF |
-| 1-yr mortality per tier | 0.06 / 0.15 / 0.32 | MAGGIC + Manemann 2018 |
-| 1-yr hospitalization per tier | 0.18 / 0.35 / 0.55 | GWTG-HF readmission |
+| GDMT rates | Assumed Bernoulli, rural vs urban | CHAMP-HF context; no fitted rates or assessed prescribing |
+| 1-yr mortality per tier | Assumed 0.06 / 0.15 / 0.32 | Not MAGGIC predictions or Manemann hazard-ratio conversion |
+| 1-yr hospitalization per tier | Assumed 0.18 / 0.35 / 0.55 | Not fitted GWTG-HF outcome estimates |
 
-All numeric constants live in `src/heartland_synthetic/registries.py` with
-inline citations.
+The principal settings live in `src/heartland_synthetic/registries.py`;
+sampling modules also contain clipping, rounding and category rules. The
+six-dimensional copula covers LVEF/eGFR/BNP/SBP/HR/BMI; DBP is generated
+separately from SBP plus noise. Associations in generated data are properties
+of these assumptions, not measured clinical relationships.
 
 ## Apply HEARTLAND scoring on a synthetic input table
 
@@ -197,7 +211,9 @@ ts = generate_time_series(df, months=12, seed=42)
 Columns: `patient_id, month, sbp, dbp, hr, weight_kg, bnp, hosp_event,
 death_event`. Vitals follow an AR(1) mean-reverting process around each
 patient's baseline. Event probabilities are tier-indexed annual rates
-compounded to monthly.
+compounded to monthly. The monthly simulation uses tier-indexed assumptions,
+not the cohort's binary annual outcome flags; the two event histories can
+disagree. Neither is an observed outcome or a validation target for the score.
 
 ## REDCap export
 
@@ -216,17 +232,19 @@ Writes two files:
 **Standalone instrument.** `export_redcap()` writes a self-contained REDCap
 project: one single-form instrument (`heartland_cohort`) whose data dictionary
 is generated from the cohort columns. It follows the official 18-column REDCap
-data dictionary layout and imports into a **new, empty** REDCap project
-(Project Setup → Upload Data Dictionary, then Import Data).
+data dictionary layout, intended for evaluation in a **new, empty** REDCap
+project. A generated CSV and local tests do not demonstrate a successful
+institutional import or clinical deployment.
 
 It is **not** an import file for the
 [HEARTLAND REDCap Instrument Template](https://github.com/vickymuller-md/redcap-template),
-which is a separate 75-field, 5-form instrument using `bl_*` / `gdmt_*` /
-`mo_*` / `out_*` field names. A field-level crosswalk between the two is
-documented in the technical report; a direct-import adapter is not provided.
+which is a separately versioned instrument. This function is not a direct
+Template importer and does not prove compatibility with its current candidate.
 
-The crosswalk is reproduced in
+The historical crosswalk for the earlier 75-field/5-form Template is in
 [`docs/redcap_template_crosswalk.md`](docs/redcap_template_crosswalk.md).
+It is not a current conversion receipt; its instrument assumptions require
+reconciliation before using it with a newer Template.
 
 ## FHIR R4 export
 
@@ -262,9 +280,11 @@ profile conformance.
 
 ## Reproducibility
 
-Every function that draws random numbers accepts a `seed` parameter. With the
-same seed, `generate_cohort` and `generate_time_series` return DataFrames that
-`pandas.testing.assert_frame_equal` on.
+The public generators accept a seed (`HeartlandCohortConfig.seed` and
+`generate_time_series(..., seed=...)`). The same seed, configuration and runtime
+produce repeatable DataFrames. This is not a promise of byte-identical results
+across dependency/platform versions. FHIR resources use random UUIDs and are
+not byte-deterministic exports. Record runtime versions alongside the seed.
 
 ```python
 cfg = HeartlandCohortConfig(n_patients=100, seed=42)
@@ -273,26 +293,27 @@ assert generate_cohort(cfg).equals(generate_cohort(cfg))
 
 ## Limitations
 
-- **Synthetic only**: this package never contains real patient data. It is not
-  a substitute for real registry or EHR analysis.
-- **Outcome rates are consistent with, not validated against, literature.**
-  The 1-year mortality and hospitalization rates per tier are modeled from
-  MAGGIC survival curves + Manemann 2018 social isolation HR + GWTG-HF
-  readmission patterns. No prospective HEARTLAND-scored cohort has been
-  outcome-validated yet.
+- **Synthetic use only**: the bundled benchmark and generator outputs are
+  synthetic. APIs can accept caller-supplied tables; the package does not
+  detect PHI or anonymize those tables. Do not provide real patient data.
+- **Assumed outcomes are not clinical evidence.** Tier-indexed event rates
+  are fixed simulation settings. Validating the HEARTLAND score against events
+  generated from that score's tiers would be circular, not independent
+  validation. Do not estimate treatment benefit, population risk or efficacy.
 - **County FIPS codes are synthetic and must not be decoded.** They are not
   ANSI/Census county GEOIDs: the 2-digit prefix is an alphabetical index over
   the state pool, not a real state FIPS, so a code can collide with the real
   FIPS of a different state and contradict the `state` column. The RUCA
   assignment and state pool are modeled but not geo-accurate.
-- **CKM staging is simplified** from the AHA 2023 Presidential Advisory
-  (stages 0-4 via diabetes / CKD / BMI / age); the full 5-stage model with
-  subclinical CVD biomarkers is not yet implemented.
+- **CKM and CKD fields are legacy simulation categories**, not adjudicated
+  clinical stages or diagnoses. Their limitations are documented in the ledger.
 - **GDMT utilization is point-prevalence** at a single reference date; no
   titration trajectory is modeled.
-- Only the 10 HEARTLAND variables plus supporting clinical context are
-  generated — no labs beyond BNP, eGFR, and BMI; no ECG, echo structural
-  parameters, or NYHA class.
+- There is no NT-proBNP, ECG, echo structural anatomy or NYHA class. BMI is
+  a modeled anthropometric measure, not a laboratory assay. Social support is
+  a numeric proxy with no questionnaire items or validated ESSI implementation.
+- No regulatory, HIPAA-compliance, de-identification, clinical-safety or
+  patient-care authorization is established by this software or its tests.
 
 ## Benchmark dataset
 
@@ -365,30 +386,17 @@ manages TLS.
 
 ## Publish runbook
 
-For the maintainer releasing a new version:
+Publication is separate from a local commit or build. Before an authorized
+release, review the exact commit and version in `pyproject.toml`, `__init__.py`,
+the changelog and site; run tests; verify the frozen CSV hash; build into a new
+empty output directory; inspect both wheel and source archive for unintended
+files; validate metadata and test an isolated installation of the built wheel.
 
-```bash
-# 1. Bump version in pyproject.toml and src/heartland_synthetic/__init__.py
-# 2. Update CHANGELOG.md with a new [x.y.z] section
-# 3. Run the full test suite
-.venv/bin/pytest -q
-
-# 4. Build sdist + wheel
-.venv/bin/pip install -e ".[publish]"
-.venv/bin/python -m build
-ls dist/
-
-# 5. Authenticate gh as vickymuller-md (important: not rodrigoeac)
-gh auth switch
-
-# 6. Tag and push
-git tag vX.Y.Z
-git push --tags
-
-# 7. Create the GitHub release from the tag
-# (Zenodo webhook mints the DOI automatically when the release is published)
-gh release create vX.Y.Z --title "vX.Y.Z" --notes-file CHANGELOG.md
-
-# 8. Upload to PyPI (requires PYPI_API_TOKEN)
-.venv/bin/twine upload dist/*
-```
+The repository's release workflow uses PyPI Trusted Publishing. Review its
+tag/version and environment gates before creating a release, because a public
+release can trigger external publication. Do not push all tags or upload an
+unreviewed `dist/*` directory. Select the exact reviewed tag/artifacts only.
+Verify the resulting PyPI files, GitHub release and Zenodo record separately;
+do not assume a webhook completed. Update the candidate/install labels only
+after public readback. A software release does not replace the benchmark's
+provenance or automatically update its technical report or dataset record.

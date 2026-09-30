@@ -1,7 +1,8 @@
 """heartland-synthetic — synthetic heart-failure cohort generator.
 
-Generates clinically-realistic HF cohorts including the 10 HEARTLAND risk
-variables (distance-to-cardiology, social support) that Synthea does not model.
+Generates simulated HF cohorts including modeled rural distance, a legacy
+social-support proxy, and the ten proposed HEARTLAND point criteria. For
+synthetic research and testing only; not a validated clinical model.
 
 Public API
 ----------

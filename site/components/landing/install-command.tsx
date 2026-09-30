@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
-
-const COMMAND = "pip install heartland-synthetic";
+import { useEffect, useRef, useState } from "react";
+import { INSTALL_COMMAND } from "@/lib/release";
 
 /**
  * InstallCommand — hero CTA chip with one-click copy.
@@ -10,84 +9,46 @@ const COMMAND = "pip install heartland-synthetic";
  */
 export function InstallCommand() {
   const [copied, setCopied] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const [pending, setPending] = useState(false);
+  const resetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => {
+    if (resetTimer.current) clearTimeout(resetTimer.current);
+  }, []);
 
   async function handleCopy() {
+    setPending(true);
+    setCopied(false);
+    setFailed(false);
+    if (resetTimer.current) clearTimeout(resetTimer.current);
     try {
-      if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(COMMAND);
-      } else {
-        const textarea = document.createElement("textarea");
-        textarea.value = COMMAND;
-        textarea.setAttribute("readonly", "");
-        textarea.style.position = "absolute";
-        textarea.style.left = "-9999px";
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textarea);
-      }
+      if (!navigator.clipboard?.writeText) throw new Error("Clipboard unavailable");
+      await navigator.clipboard.writeText(INSTALL_COMMAND);
       setCopied(true);
-      setTimeout(() => setCopied(false), 1600);
+      resetTimer.current = setTimeout(() => setCopied(false), 1600);
     } catch {
-      // graceful fallback: user can still select manually
+      setFailed(true);
+    } finally {
+      setPending(false);
     }
   }
 
   return (
-    <button
-      type="button"
-      onClick={handleCopy}
-      aria-label="Copy install command"
-      className="group inline-flex max-w-full items-center gap-3 overflow-hidden rounded-xl border border-grid bg-panel px-5 py-4 text-left font-mono text-[14.5px] text-cool transition-colors hover:border-cool/40"
-    >
-      <span aria-hidden className="select-none text-alert">
-        $
-      </span>
-      <span className="truncate">{COMMAND}</span>
-      <span
-        aria-live="polite"
-        className={
-          "ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-full border border-grid px-2.5 py-1 font-editorial text-[11.5px] tracking-tight transition-colors " +
-          (copied
-            ? "border-signal/40 bg-signal/10 text-signal"
-            : "bg-terminal text-stone group-hover:text-cool")
-        }
+    <div className="max-w-full">
+      <code className="mb-3 block break-all font-mono text-[14.5px] leading-relaxed text-cool">{INSTALL_COMMAND}</code>
+      <button
+        type="button"
+        onClick={handleCopy}
+        disabled={pending}
+        aria-label="Copy install command"
+        className="inline-flex max-w-full items-center rounded-full border border-grid bg-panel px-5 py-3 text-left font-editorial text-sm text-cool transition-colors hover:border-cool/40 disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-alert"
       >
-        {copied ? (
-          <>
-            <svg
-              viewBox="0 0 16 16"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="h-3 w-3"
-              aria-hidden
-            >
-              <path d="M3 8 L 7 12 L 13 4" />
-            </svg>
-            Copied
-          </>
-        ) : (
-          <>
-            <svg
-              viewBox="0 0 16 16"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="h-3 w-3"
-              aria-hidden
-            >
-              <rect x="4.5" y="4.5" width="8" height="9" rx="1.5" />
-              <path d="M3 11 V 3.5 a 1 1 0 0 1 1 -1 H 10" />
-            </svg>
-            Copy
-          </>
-        )}
-      </span>
-    </button>
+        {copied ? "Copied" : pending ? "Copying" : "Copy command"}
+      </button>
+      <p role="status" className="mt-2 min-h-5 text-sm text-cool/75">
+        {failed ? "Copy unavailable. Select the command above and copy it manually." : copied ? "Command copied." : ""}
+      </p>
+    </div>
   );
 }

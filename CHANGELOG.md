@@ -25,6 +25,13 @@ version number in source is not evidence of a PyPI, GitHub, or Zenodo release.
   duplicate/MultiIndex labels, empty tables, and input preservation.
 
 ### Changed
+- Public descriptions distinguish the local 0.3.0 candidate, published 0.2.2
+  installation and preserved dataset. The assumptions ledger and site explain
+  simulated outcomes, social-support proxy, geography and clinical-stage limits
+  without claims of empirical calibration, exclusivity or PHI exclusion.
+- Source comments/documentation now describe the six-dimensional copula,
+  separate monthly outcome draws and medication-disabled zero flags accurately.
+  No sampling expressions, numerical constants, or clinical thresholds changed.
 - `export_fhir_bundle`: `Patient.address` no longer writes the synthetic
   county code to `postalCode`. The code is carried in an `Address` extension
   (`https://fhir.heartlandprotocol.org/StructureDefinition/heartland-synthetic-county-code`)

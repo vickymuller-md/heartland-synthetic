@@ -31,9 +31,9 @@ class HeartlandCohortConfig:
         Share of female patients. 0.0 to 1.0.
     include_outcomes:
         If True, attach ``mortality_1yr`` and ``hospitalization_1yr`` columns.
-        Honored in Session 2; currently ignored.
     include_medications:
-        If True, attach GDMT utilization columns.
+        If True, sample GDMT flags. If False, retain the columns filled with
+        simulation zeros; those zeros do not represent assessed non-use.
     seed:
         Integer seed for reproducibility. ``None`` draws from OS entropy.
     """

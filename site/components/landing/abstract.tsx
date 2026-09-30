@@ -11,11 +11,11 @@ export function Abstract() {
             Why this exists
           </p>
           <h2 className="mt-5 text-[clamp(1.85rem,3.5vw,2.85rem)] font-editorial font-semibold leading-[1.15] tracking-[-0.015em] text-cool">
-            Synthea and peers don&rsquo;t model the{" "}
+            Make simulation assumptions{" "}
             <span className="font-display italic font-normal text-alert">
-              rural HF barriers
+              visible and inspectable
             </span>
-            . This package does.
+            .
           </h2>
         </div>
 
@@ -23,38 +23,38 @@ export function Abstract() {
           <StatCard
             value="10"
             heading="HEARTLAND variables"
-            note="Including distance-to-cardiology and social support — omitted by MAGGIC / GWTG-HF / SHFM."
+            note="Ten weighted criteria, including modeled distance and a legacy social-support proxy."
           />
           <StatCard
-            value="65"
-            heading="passing tests"
-            note="Scoring correctness, distribution validation, reproducibility, copula correlation, export roundtrips."
+            value="3"
+            heading="proposed tiers"
+            note="Low 0–4, moderate 5–8, high 9–18. Point groups, not predicted probabilities."
             accent
           />
           <StatCard
             value="MIT"
             heading="open source"
-            note="PyPI + Zenodo DOI. Free for every researcher and institution that wants it."
+            note="Open source for synthetic research and software testing. Publication is separate from clinical validation."
           />
         </div>
 
         <p className="mx-auto mt-16 max-w-2xl text-center font-editorial text-[15.5px] leading-relaxed text-cool/75">
-          Every clinical distribution is anchored to a published registry.
-          Every output column cites a source in the code.{" "}
-          <span className="text-cool">No black box, no hidden priors.</span>
+          Constants and sampling rules can be inspected in the source.
+          Background references motivate the domains; they do not establish
+          parameter fitting or clinical calibration.{" "}
+          <a href="#assumptions" className="text-cool underline underline-offset-4">Read the modeling boundaries.</a>
         </p>
 
         <div className="mt-20 grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6">
           <Disclaimer heading="Synthetic only">
-            No real patient data passes through this package. Distributions
-            are drawn from published literature; nothing written to disk
-            comes from a registry subject or EHR record. By design.
+            Generator outputs and the bundled benchmark are synthetic.
+            Caller-supplied tables are not anonymized or screened for PHI.
+            Do not enter real patient, personal, or health information.
           </Disclaimer>
-          <Disclaimer heading="Not a medical device">
-            `heartland-synthetic` is a research tool for cohort simulation
-            and scoring engine validation. It is not intended for clinical
-            decision-making on real patients and has not been validated
-            against a prospective HEARTLAND-scored cohort.
+          <Disclaimer heading="Proposed, pending validation">
+            This is a research and educational implementation-support resource.
+            Structural input checks and synthetic tests do not establish
+            clinical validity, safety, regulatory status or patient-care authorization.
           </Disclaimer>
         </div>
       </div>

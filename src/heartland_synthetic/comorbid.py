@@ -22,13 +22,11 @@ def _assign_ckm_stage(
     age: np.ndarray,
     rng: np.random.Generator,
 ) -> np.ndarray:
-    """CKM staging per AHA 2023 Presidential Advisory (simplified).
+    """Legacy synthetic 0-4 category, not clinical AHA CKM staging.
 
-    Stage 0: no risk factors.
-    Stage 1: excess adiposity (BMI >= 30) OR dysfunctional adiposity (BMI >= 25 with metabolic issues).
-    Stage 2: metabolic risk factors or mod-severe CKD.
-    Stage 3: subclinical CVD (modeled here as age-driven among stage 2 candidates).
-    Stage 4: clinical CVD (all HF patients qualify in principle; gated by severity).
+    Uses BMI, diabetes, eGFR-derived category and a random age-based transition.
+    In particular, reserving 4 for selected rows in an HF cohort is a simulation
+    convention, not a faithful application of the AHA disease-stage definition.
     """
     n = len(diabetes)
     stage = np.zeros(n, dtype=int)
@@ -40,14 +38,12 @@ def _assign_ckm_stage(
     stage2_mask = (diabetes.astype(bool)) | (ckd_stage >= 3)
     stage[stage2_mask] = np.maximum(stage[stage2_mask], 2)
 
-    # Stage 3: age-driven transition among stage 2 (subclinical atherosclerosis)
+    # Simulated category 3: random age-driven transition, not diagnosed disease.
     age_risk = rng.random(n) < np.clip((age - 50) / 50.0, 0.0, 0.8)
     stage3_mask = stage2_mask & age_risk
     stage[stage3_mask] = 3
 
-    # Stage 4: established CVD — this is a HF cohort, so all patients have
-    # heart failure. We reserve Stage 4 for the sickest: advanced CKD (>=4) or
-    # diabetes+CKD combo.
+    # Simulated category 4: legacy rule, not an adjudicated clinical stage.
     stage4_mask = (ckd_stage >= 4) | ((diabetes.astype(bool)) & (ckd_stage >= 3))
     stage[stage4_mask] = 4
 

@@ -1,10 +1,9 @@
 """Clinical vitals via Gaussian copula + HF-type-conditional marginals.
 
-The copula captures joint dependence across seven continuous vitals
-[lvef, egfr, bnp, sbp, dbp, hr, bmi]. Each marginal is applied in its own
-distribution keyed on hf_type / age so stratified means stay correct.
-DBP is reconstructed from SBP post-copula (kept in the 7-dim structure with a
-reduced effective coupling).
+The six-dimensional copula models [lvef, egfr, bnp, sbp, hr, bmi] using an
+assumed correlation matrix. DBP is generated separately from SBP plus noise.
+Marginals, subgroup shifts and clipping are simulation choices, not estimates
+fitted to a patient-level registry or evidence of clinical realism.
 """
 
 from __future__ import annotations
@@ -158,7 +157,7 @@ def sample_clinical(
     hr = _inverse_hr(u[:, 4])
     bmi = _inverse_bmi(u[:, 5], hf_types)
 
-    # DBP: derived from SBP + independent Gaussian noise (clinically ~0.65 corr).
+    # DBP: derived from SBP + independent Gaussian noise (assumed correlation).
     dbp_noise = rng.normal(0.0, DBP_NOISE_SD, size=n)
     dbp = DBP_SBP_COEF * sbp + dbp_noise
     dbp = np.clip(dbp, DBP_CLIP[0], DBP_CLIP[1])

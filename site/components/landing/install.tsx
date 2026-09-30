@@ -2,6 +2,8 @@
  * Install CTA — pip block + a minimal usage snippet. Mono style picks up
  * the Sora mono-editorial variable from layout.
  */
+import { INSTALL_COMMAND, PUBLISHED_VERSION, CANDIDATE_VERSION } from "@/lib/release";
+
 export function Install() {
   return (
     <section
@@ -15,14 +17,16 @@ export function Install() {
               Install
             </p>
             <h2 className="mt-5 text-[clamp(2rem,4vw,3rem)] font-editorial font-semibold leading-[1.08] tracking-[-0.02em] text-cool">
-              Five lines of Python,{" "}
+              A short Python example,{" "}
               <span className="font-display italic font-normal text-cool/70">
                 one cohort.
               </span>
             </h2>
             <p className="mt-6 max-w-md font-editorial text-[15.5px] leading-relaxed text-cool/70">
-              Python 3.10+, pure-Python dependencies (numpy, pandas, scipy).
-              No Docker, no GPU, no server runtime.
+              Python 3.10+ with NumPy, pandas and SciPy. The command pins
+              published v{PUBLISHED_VERSION}; it does not install candidate
+              v{CANDIDATE_VERSION}. Candidate input checks require a reviewed
+              source checkout. No GPU or server runtime is required.
             </p>
 
             <div className="mt-8 space-y-2 font-editorial text-[13px] text-cool/70">
@@ -62,10 +66,10 @@ export function Install() {
             </div>
           </div>
 
-          <div className="md:col-span-7">
+          <div className="min-w-0 md:col-span-7">
             <CodeBlock
               label="pip"
-              lines={["$ pip install heartland-synthetic"]}
+              lines={[`$ ${INSTALL_COMMAND}`]}
             />
             <div className="h-4" />
             <CodeBlock
@@ -105,7 +109,7 @@ function CodeBlock({ label, lines }: { label: string; lines: string[] }) {
           {label}
         </span>
       </div>
-      <pre className="overflow-x-auto px-5 py-5 font-mono text-[13.5px] leading-relaxed text-cool">
+      <pre tabIndex={0} role="region" aria-label={`${label} code example`} className="overflow-x-auto px-5 py-5 font-mono text-[13.5px] leading-relaxed text-cool focus-visible:outline-2 focus-visible:outline-alert">
         {lines.join("\n")}
       </pre>
     </div>

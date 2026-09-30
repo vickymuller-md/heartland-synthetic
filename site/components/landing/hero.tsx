@@ -16,23 +16,21 @@ export function Hero() {
                 className="h-1.5 w-1.5 rounded-full bg-signal"
                 aria-hidden
               />
-              MIT licensed · PyPI + Zenodo · Pure Python
+              MIT licensed · Synthetic research toolkit
             </p>
 
             <h1 className="mt-7 text-[clamp(2.5rem,6vw,5rem)] font-editorial font-semibold leading-[1.04] tracking-[-0.025em] text-cool">
               Synthetic HF cohorts,{" "}
               <span className="font-display italic font-normal text-alert">
-                with the variables Synthea leaves out.
+                with rural access in the picture.
               </span>
             </h1>
 
             <p className="mt-7 max-w-xl font-editorial text-[17px] leading-[1.65] text-cool/75 md:text-[18px]">
-              A Python package that generates clinically-realistic
-              heart-failure patient cohorts with the 10 HEARTLAND risk
-              variables — including distance-to-cardiology and social
-              support — that Synthea and other generators do not model.
-              Ships the scoring engine, a time-series generator, and FHIR
-              / REDCap exporters.
+              A Python package for simulated heart-failure cohorts with
+              ten proposed HEARTLAND point criteria, modeled distance to
+              cardiology and a social-support proxy. Explore software tests,
+              monthly simulations and export examples without using patient data.
             </p>
 
             <div className="mt-10">
@@ -63,9 +61,9 @@ export function Hero() {
             </div>
 
             <p className="mt-12 max-w-md font-editorial text-[12.5px] leading-relaxed text-stone">
-              Synthetic data only — no PHI, by design. Distributions are
-              anchored to published registries (PARADIGM-HF, DELIVER,
-              CHAMP-HF, ENRICHD, GWTG-HF).
+              Do not supply real patient, personal, or health information.
+              Simulation assumptions are not clinical validation. The package
+              does not detect PHI or anonymize caller-supplied data.
             </p>
           </div>
 

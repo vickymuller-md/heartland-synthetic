@@ -12,6 +12,8 @@ def sample_outcomes(df: pd.DataFrame, rng: np.random.Generator) -> pd.DataFrame:
     """Return mortality_1yr, hospitalization_1yr aligned to ``df``.
 
     Rates are tier-indexed Bernoulli draws using :data:`OUTCOME_RATES`.
+    These fixed assumptions are not fitted outcome estimates. Using them to
+    validate the score would be circular because the tier selects the rates.
 
     Parameters
     ----------

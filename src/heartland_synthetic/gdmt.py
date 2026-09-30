@@ -1,7 +1,8 @@
 """GDMT utilization: ACEi/ARB/ARNI, beta-blocker, MRA, SGLT2i.
 
-Baseline rates calibrated against CHAMP-HF so that P(all four) ~ 0.01 and
-P(>= 1 class) ~ 0.80 in a mixed urban/rural cohort.
+Per-class Bernoulli rates are assumptions with CHAMP-HF as background context,
+not fitted estimates. Class flags do not identify a drug, dose, indication,
+contraindication assessment, treatment plan, or care delivered.
 """
 
 from __future__ import annotations
@@ -34,7 +35,7 @@ def sample_gdmt(df: pd.DataFrame, rng: np.random.Generator) -> pd.DataFrame:
     mra = draw("mra")
     sglt2 = draw("sglt2i")
 
-    # Safety override: SGLT2i contraindicated below eGFR threshold
+    # Legacy simulation override only; not a clinical contraindication rule.
     sglt2[egfr < SGLT2I_EGFR_MIN] = 0
 
     counts = acei + bb + mra + sglt2

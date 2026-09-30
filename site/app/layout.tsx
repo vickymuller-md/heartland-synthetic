@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Sora, Instrument_Serif } from "next/font/google";
 import "@heartland/ui/css/theme.css";
 import "./globals.css";
+import { SYNTHETIC_DESCRIPTION } from "@/lib/release";
 
 const geist = Geist({
   subsets: ["latin"],
@@ -33,16 +34,14 @@ const soraMono = Sora({
 
 export const metadata: Metadata = {
   title: "heartland-synthetic — Synthetic HF cohorts with HEARTLAND risk variables",
-  description:
-    "Python package that generates clinically-realistic synthetic heart-failure patient cohorts including the 10 HEARTLAND risk variables — distance-to-cardiology and social support — that Synthea does not model.",
+  description: SYNTHETIC_DESCRIPTION,
   metadataBase: new URL("https://synthetic.heartlandprotocol.org"),
   verification: {
     google: "KRMDAqi7exo5408R8MNrs3LGbdxohMbX-p7tEtaACCg",
   },
   openGraph: {
     title: "heartland-synthetic",
-    description:
-      "Synthetic HF cohorts with the 10 HEARTLAND risk variables. MIT licensed, published on PyPI + Zenodo.",
+    description: SYNTHETIC_DESCRIPTION,
     url: "https://synthetic.heartlandprotocol.org",
     siteName: "heartland-synthetic",
     locale: "en_US",

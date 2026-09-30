@@ -1,4 +1,7 @@
-"""Rural-specific variables: distance to cardiology, ENRICHD ESSI score."""
+"""Modeled distance to cardiology and a legacy synthetic social-support proxy.
+
+No NPPES/Atlas routing or ESSI questionnaire is performed.
+"""
 
 from __future__ import annotations
 
@@ -35,7 +38,7 @@ def sample_rural_variables(
     distance = np.exp(rng.normal(log_mean, log_sd, size=n))
     distance = np.clip(distance, DISTANCE_CLIP[0], DISTANCE_CLIP[1])
 
-    # ENRICHD ESSI: 8 items * 5-pt Likert (range 8-40)
+    # Legacy proxy: a single simulated number, not a sum of questionnaire items.
     essi_mean = np.where(is_rural, ESSI_RURAL_MEAN, ESSI_URBAN_MEAN)
     essi_sd = np.where(is_rural, ESSI_RURAL_SD, ESSI_URBAN_SD)
     essi = rng.normal(essi_mean, essi_sd, size=n)

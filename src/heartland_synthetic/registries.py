@@ -1,7 +1,9 @@
-"""Distribution constants with registry citations.
+"""Simulation constants and background references.
 
-Every value here is anchored to a published registry or trial. Keep this module
-purely declarative — no sampling logic lives here.
+The literature below motivates modeled domains; it does not establish that
+each parameter was estimated from a registry or trial. Marginals, correlations,
+shifts, rural gaps and outcome probabilities are simulation assumptions, not
+empirical calibration or clinical validation. See docs/model_assumptions.md.
 
 Sources
 -------
@@ -12,14 +14,15 @@ Sources
 - STRONG-HF: Mebazaa A et al. Lancet 2022;400:1938-1952.
 - CHAMP-HF: Greene SJ et al. J Am Coll Cardiol 2018;72:351-366.
 - NHANES: National Health and Nutrition Examination Survey (CDC).
-- ENRICHD ESSI: Enhancing Recovery in Coronary Heart Disease Patients
-  Social Support Instrument (8 items, 5-pt Likert, range 8-40).
+- ENRICHD: background on social support. The ESSI_* legacy identifiers below
+  describe a synthetic proxy, not an implemented questionnaire or scale.
 - NPPES NPI: National Plan and Provider Enumeration System.
 - USDA RUCA: Rural-Urban Commuting Area codes (1-3 urban, 4-10 rural).
 - KDIGO 2012 CKD staging.
 - AHA 2023 Presidential Advisory on CKM Syndrome
   (DOI 10.1161/CIR.0000000000001184).
-- Manemann SM et al. J Am Heart Assoc 2018;7:e008069 (social isolation HR 3.74).
+- Manemann SM et al. J Am Heart Assoc 2018;7:e008069 (background only;
+  no individual hazard-ratio multiplier is applied by this generator).
 """
 
 from __future__ import annotations
@@ -56,13 +59,13 @@ LVEF_PARAMS = {
     "hfpef": {"mean": 60.0, "sd": 8.0, "lo": 50.0, "hi": 75.0},
 }
 
-# eGFR log-normal (STRONG-HF baseline)
+# Assumed eGFR log-normal; STRONG-HF is background, not a fitted source dataset.
 EGFR_LOG_MEAN = 4.094  # ln(60)
 EGFR_LOG_SD = 0.35
 EGFR_CLIP = (15.0, 120.0)
 EGFR_ELDERLY_SHIFT = -10.0  # applied if age >= 75
 
-# BNP log-normal (PARADIGM-HF baseline ~600 pg/mL median)
+# Assumed BNP log-normal; not a fitted PARADIGM-HF marginal.
 BNP_LOG_MEAN = 6.397  # ln(600)
 BNP_LOG_SD = 0.9
 BNP_HFPEF_MULTIPLIER = 0.70  # HFpEF has lower BNP than HFrEF
@@ -71,7 +74,7 @@ BNP_HFPEF_MULTIPLIER = 0.70  # HFpEF has lower BNP than HFrEF
 SBP_MEAN = 125.0
 SBP_SD = 20.0
 SBP_CLIP = (80.0, 200.0)
-SBP_RURAL_SHIFT = 5.0  # untreated HTN bias
+SBP_RURAL_SHIFT = 5.0  # assumed rural shift, not an observed causal effect
 
 HR_MEAN = 78.0
 HR_SD = 14.0
@@ -85,7 +88,7 @@ BMI_HFPEF_SHIFT = 3.0
 
 # DBP derived from SBP
 DBP_SBP_COEF = 0.6
-# Calibrated so Pearson corr(SBP, DBP) ~ 0.65 (clinically realistic):
+# Algebraic target for the untruncated simulation, not clinical calibration:
 # 12 / sqrt(12^2 + DBP_NOISE_SD^2) = 0.65 -> DBP_NOISE_SD ~ 14.
 DBP_NOISE_SD = 14.0
 DBP_CLIP = (40.0, 120.0)
@@ -109,21 +112,22 @@ CORR_VITALS = [
     [ 0.05, -0.05, -0.05, 0.25, 0.05, 1.00],  # bmi
 ]
 
-# Target Pearson correlation for the SBP->DBP linear model (clinically ~0.65).
+# Assumed target Pearson correlation for the SBP->DBP linear model.
 SBP_DBP_TARGET_CORR = 0.65
 
 
 # -----------------------------------------------------------------------------
 # Rural variables
 # -----------------------------------------------------------------------------
-# Distance to cardiology (NPPES NPI derived)
+# Assumed distance distribution; no NPPES geocoding, road routing or Atlas join.
 DISTANCE_RURAL_LOG_MEAN = 3.555   # ln(35)
 DISTANCE_RURAL_LOG_SD = 0.7
 DISTANCE_URBAN_LOG_MEAN = 1.792   # ln(6)
 DISTANCE_URBAN_LOG_SD = 0.6
 DISTANCE_CLIP = (0.5, 400.0)
 
-# ENRICHD ESSI (range 8-40; <18 ~= lowest tertile = "limited social support")
+# Legacy social-support proxy. ESSI_* names retained for code compatibility;
+# 8-40 and <18 are simulation settings, not an ESSI version or validated cutoff.
 ESSI_URBAN_MEAN = 29.0
 ESSI_URBAN_SD = 6.0
 ESSI_RURAL_MEAN = 24.0
@@ -162,7 +166,7 @@ def ckd_stage_from_egfr(egfr: float) -> int:
 # -----------------------------------------------------------------------------
 # GDMT utilization (CHAMP-HF)
 # -----------------------------------------------------------------------------
-# Calibrated so P(all four) ~ 0.01 and P(>=1) ~ 0.80 in mixed cohort.
+# Assumed per-class rates; not fitted CHAMP-HF data or observed rural effects.
 GDMT_RATES = {
     "urban": {
         "acei_arb_arni": 0.55,
@@ -177,23 +181,21 @@ GDMT_RATES = {
         "sglt2i": 0.10,
     },
 }
-# Safety overrides
+# Simulation override; not a clinical contraindication rule.
 SGLT2I_EGFR_MIN = 20.0  # zero out if eGFR below this
 
 
 # -----------------------------------------------------------------------------
-# Hidden generator settings
+# Other explicit generator settings
 # -----------------------------------------------------------------------------
-PRIOR_HF_HOSP_P = 0.20  # baseline probability before risk-tier reinjection
+PRIOR_HF_HOSP_P = 0.20  # fixed Bernoulli assumption; no risk-tier reinjection
 
 
 # -----------------------------------------------------------------------------
 # Outcome rates by HEARTLAND tier (1-year)
 # -----------------------------------------------------------------------------
-# Mortality: MAGGIC 1-yr survival curves stratified by risk + Manemann 2018
-#   (social isolation HR 3.74) uplift for the high tier.
-# Hospitalization: GWTG-HF 30-day readmission scaled to 1-year incidence using
-#   published quarterly readmission patterns.
+# Fixed illustrative probabilities, NOT MAGGIC predictions, hazard-ratio
+# conversion, registry-fitted estimates, or observed HEARTLAND outcomes.
 OUTCOME_RATES = {
     "low":      {"mortality_1yr": 0.06, "hospitalization_1yr": 0.18},
     "moderate": {"mortality_1yr": 0.15, "hospitalization_1yr": 0.35},

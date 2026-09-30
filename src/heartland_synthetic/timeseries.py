@@ -46,9 +46,9 @@ def _baseline_weights(
 def _resolve_annual_rates(cohort: pd.DataFrame) -> tuple[np.ndarray, np.ndarray]:
     """Return per-patient (mortality_1yr, hosp_1yr) probabilities.
 
-    If the cohort has outcome columns, use them (binary → collapse to tier
-    rate so compounding stays stable). Otherwise fall back to tier-indexed
-    :data:`OUTCOME_RATES`.
+    Always use tier-indexed :data:`OUTCOME_RATES`. Existing binary outcome
+    columns are not consumed; the monthly series is a separate simulation
+    and need not agree with the cohort's annual outcome flags.
     """
     if "heartland_risk_tier" not in cohort.columns:
         raise KeyError(

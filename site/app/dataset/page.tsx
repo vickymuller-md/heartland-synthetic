@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SYNTHETIC_BOUNDARY } from "@/lib/release";
 import { Colophon, Masthead } from "@heartland/ui";
 
 const SITE_URL = "https://synthetic.heartlandprotocol.org";
@@ -37,7 +38,7 @@ const datasetStructuredData = {
   name: "HEARTLAND Synthetic Heart-Failure Benchmark Cohort",
   alternateName: "HEARTLAND Synthetic HF Cohort — 1,000 rows, seed 42",
   description:
-    "Versioned, reproducible tabular benchmark dataset containing 1,000 entirely synthetic adult heart-failure records and 31 variables. It includes demographics, modeled rurality, heart-failure phenotype, vitals, comorbidities, distance to cardiology, social support, GDMT exposure, the unvalidated HEARTLAND risk score and tier, and modeled one-year outcomes. It was generated with heartland-synthetic using seed 42 and contains no real patient data, protected health information, or geo-accurate county identifiers. Modeled distributions and outcomes are not a substitute for clinical or registry data.",
+    "Preserved benchmark dataset v1.0.0 containing 1,000 synthetic adult heart-failure records and 31 variables, generated with heartland-synthetic v0.2.2 and seed 42. Includes simulated demographics, access, clinical variables, legacy social-support and staging proxies, medication-class flags, proposed HEARTLAND point tiers, and assumed one-year outcomes. It contains no real patient records or geo-accurate county identifiers. Its fixed outcome settings cannot validate the score that selects them. A new software candidate does not replace this CSV or its original provenance.",
   url: DATASET_URL,
   mainEntityOfPage: DATASET_URL,
   version: "1.0.0",
@@ -79,7 +80,7 @@ const datasetStructuredData = {
   measurementTechnique: [
     "Deterministic pseudorandom cohort generation with seed 42",
     "Gaussian-copula sampling of continuous clinical variables",
-    "Literature-anchored marginal distributions and tier-indexed modeled outcomes",
+    "Assumed marginal distributions and tier-indexed simulation probabilities, not clinical calibration",
   ],
   variableMeasured: [
     "Demographics and modeled rurality",
@@ -141,7 +142,7 @@ export default function DatasetPage() {
           external: true,
         }}
         cta={{
-          label: "Download CSV",
+          label: "CSV",
           href: DOWNLOAD_PATH,
           external: false,
         }}
@@ -160,11 +161,17 @@ export default function DatasetPage() {
               </span>
             </h1>
             <p className="mt-7 max-w-3xl font-editorial text-[17px] leading-[1.7] text-cool/75">
-              A reproducible, 1,000-row synthetic heart-failure cohort for
+              A preserved, 1,000-row synthetic heart-failure cohort for
               research, education, software testing, and interoperability
               demonstrations. Every row is generated; no real patient record,
               protected health information, or geo-accurate county identifier is
               included.
+            </p>
+            <p className="mt-5 max-w-3xl font-editorial text-[15px] leading-relaxed text-cool/75">
+              Dataset v1.0.0 retains generator v0.2.2 provenance. The software
+              candidate v0.3.0 does not regenerate or rename this CSV.
+              Social support and staging are legacy simulation proxies; event
+              probabilities are assumptions, not observed outcomes.
             </p>
             <div className="mt-10 flex flex-wrap gap-3">
               <a
@@ -267,7 +274,8 @@ export default function DatasetPage() {
               <li>The dataset contains no real patients and cannot estimate population prevalence.</li>
               <li>County FIPS values are synthetic and are not geographically accurate.</li>
               <li>The HEARTLAND risk score is a proposed, unvalidated framework.</li>
-              <li>Modeled outcomes are literature-consistent assumptions, not observed events.</li>
+              <li>Modeled outcomes use fixed assumptions, not observed events or fitted estimates. Testing the score against its own tier-selected outcomes would be circular.</li>
+              <li>The legacy 8–40 social-support proxy is not an ESSI instrument, and the CKM category is not an adjudicated clinical stage.</li>
               <li>Do not use this dataset for diagnosis, treatment, prognosis, or patient care.</li>
             </ul>
           </div>
@@ -278,7 +286,7 @@ export default function DatasetPage() {
         currentSite="synthetic"
         version="dataset v1.0.0"
         description="Open, reproducible synthetic heart-failure benchmark cohort. No real patient data or PHI."
-        legal="Built by Vicky Muller Ferreira, MD. For research and educational use only. Synthetic data; no PHI. Not a medical device. Not for clinical decision-making or direct patient care."
+        legal={SYNTHETIC_BOUNDARY}
         extraBlocks={[
           {
             title: "Dataset",
