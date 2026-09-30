@@ -23,6 +23,7 @@ from typing import Any
 import pandas as pd
 
 from heartland_synthetic.registries import FHIR_CODES
+from heartland_synthetic.exports._validation import validate_cohort, write_new_files
 
 
 _ICD10_SYSTEM = "http://hl7.org/fhir/sid/icd-10-cm"
@@ -131,7 +132,7 @@ def _patient_resource(row: pd.Series, reference_date: str) -> dict[str, Any]:
             _us_core_extension(_US_CORE_ETHNICITY_EXT, eth_code, eth_text),
         ],
         "gender": "female" if row["sex"] == "F" else "male",
-        "birthDate": str(_birth_year(row["age"], reference_date)),
+        "birthDate": f"{_birth_year(row['age'], reference_date):04d}",
         "address": [
             {
                 "extension": [
@@ -403,40 +404,27 @@ def export_fhir_bundle(
     ----------
     df:
         Cohort DataFrame (output of :func:`generate_cohort`). Must include the
-        standard columns used by the Bundle builder.
+        complete standard cohort schema. All rows are checked before output;
+        extra columns, inconsistent scores and invalid values are rejected.
     out_dir:
         Directory for the JSON outputs (created if missing). One file
-        ``{patient_id}.json`` is written per patient.
+        ``{patient_id}.json`` is written per patient. Existing targets are never
+        overwritten. A later filesystem failure may leave partial new output.
 
     Returns
     -------
     list[pathlib.Path]
         Paths written, in cohort row order.
     """
-    required = {
-        "patient_id", "age", "sex", "race", "state", "county_fips",
-        "hf_type", "lvef", "egfr", "bnp", "sbp", "dbp", "hr", "bmi",
-        "diabetes", "af", "ckd_stage", "prior_hf_hosp_6mo",
-        "heartland_risk_score", "heartland_risk_tier",
-    }
-    missing = required - set(df.columns)
-    if missing:
-        raise KeyError(
-            f"export_fhir_bundle: cohort missing columns: {sorted(missing)}"
-        )
-
+    checked = validate_cohort(df, kind="fhir")
     out_dir = Path(out_dir)
-    out_dir.mkdir(parents=True, exist_ok=True)
-
-    paths: list[Path] = []
-    for _, row in df.iterrows():
+    outputs: list[tuple[Path, str]] = []
+    for values in checked.itertuples(index=False, name=None):
+        row = dict(zip(checked.columns, values))
         bundle = _build_bundle(row)
-        fname = f"{row['patient_id']}.json"
-        path = out_dir / fname
-        with path.open("w", encoding="utf-8") as fh:
-            json.dump(bundle, fh, indent=2, ensure_ascii=False)
-        paths.append(path)
-    return paths
+        outputs.append((out_dir / f"{row['patient_id']}.json",
+                        json.dumps(bundle, indent=2, ensure_ascii=False, allow_nan=False)))
+    return write_new_files(outputs)
 
 
 __all__ = ["export_fhir_bundle"]

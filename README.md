@@ -217,6 +217,18 @@ disagree. Neither is an observed outcome or a validation target for the score.
 
 ## REDCap export
 
+Candidate0.3.0 exporters require the complete generated cohort schema, including
+the ten score inputs. They reject extra/duplicate columns, invalid categories,
+missing or lossy numeric values, unsafe/duplicate IDs and inconsistent score,
+tier or GDMT count. Optional annual outcome columns must be supplied together.
+All rows are validated and serialized before output; input tables are not changed.
+See the [export input contract](docs/export_input_contract.md) for exact boundaries.
+These checks are structural, not clinical validation or PHI detection.
+
+Use a fresh output directory or prefix: existing targets (including symbolic
+links) are refused, never overwritten. A later I/O failure can leave partial
+new output; the whole export batch is not an atomic filesystem transaction.
+
 ```python
 from heartland_synthetic import export_redcap
 data_csv, dict_csv = export_redcap(df, "outputs/heartland_cohort")

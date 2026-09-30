@@ -12,10 +12,12 @@ a separate 75-field, 5-form instrument using ``bl_*`` / ``gdmt_*`` / ``mo_*`` /
 from __future__ import annotations
 
 import csv
+from io import StringIO
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
+
+from heartland_synthetic.exports._validation import validate_cohort, write_new_files
 
 from heartland_synthetic.registries import (
     REDCAP_BOOLEAN_COLUMNS,
@@ -103,8 +105,8 @@ def export_redcap(
 ) -> tuple[Path, Path]:
     """Write REDCap data + data-dictionary CSVs for a standalone instrument.
 
-    The pair imports into a new, empty REDCap project (Project Setup -> Upload
-    Data Dictionary, then Import Data). It is not an import file for the
+    The pair is intended for evaluation in a new, empty REDCap project. Local
+    generation does not prove institutional import success. It is not an import file for the
     HEARTLAND REDCap Instrument Template — see the module docstring.
 
     The output data CSV renames ``patient_id`` to ``record_id`` (REDCap
@@ -113,37 +115,31 @@ def export_redcap(
     Parameters
     ----------
     df:
-        Cohort DataFrame (output of :func:`generate_cohort`).
+        Complete cohort DataFrame (output of :func:`generate_cohort`).
+        All rows are validated before any output; extra columns are rejected.
     out_prefix:
         Path prefix; two files will be written:
-        ``{out_prefix}.csv`` and ``{out_prefix}_datadict.csv``.
+        ``out_prefix.with_suffix('.csv')`` and ``{out_prefix}_datadict.csv``.
+        Existing targets are never overwritten. Later I/O failures may leave
+        partial new output; use a fresh destination for every export.
 
     Returns
     -------
     tuple[Path, Path]
         Paths to the data CSV and the data-dictionary CSV.
     """
+    data_df = validate_cohort(df, kind="redcap").rename(columns={"patient_id": "record_id"})
+    data_df = data_df[["record_id", *(c for c in data_df.columns if c != "record_id")]]
     out_prefix = Path(out_prefix)
-    out_prefix.parent.mkdir(parents=True, exist_ok=True)
-
-    data_df = df.copy()
-    if "patient_id" in data_df.columns:
-        data_df = data_df.rename(columns={"patient_id": "record_id"})
-    # REDCap expects boolean-like fields as 0/1.
-    for col in data_df.columns:
-        if col in REDCAP_BOOLEAN_COLUMNS:
-            data_df[col] = data_df[col].astype(int)
-
     data_path = out_prefix.with_suffix(".csv")
-    data_df.to_csv(data_path, index=False)
-
     dict_path = out_prefix.parent / f"{out_prefix.name}_datadict.csv"
-    with dict_path.open("w", newline="") as fh:
-        writer = csv.DictWriter(fh, fieldnames=REDCAP_DD_HEADER)
-        writer.writeheader()
-        for col in data_df.columns:
-            writer.writerow(_field_definition(col, data_df[col]))
-
+    dictionary = StringIO(newline="")
+    writer = csv.DictWriter(dictionary, fieldnames=REDCAP_DD_HEADER)
+    writer.writeheader()
+    for col in data_df.columns:
+        writer.writerow(_field_definition(col, data_df[col]))
+    write_new_files([(data_path, data_df.to_csv(index=False)),
+                     (dict_path, dictionary.getvalue())])
     return data_path, dict_path
 
 

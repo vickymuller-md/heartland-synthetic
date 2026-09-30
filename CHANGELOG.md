@@ -25,6 +25,10 @@ version number in source is not evidence of a PyPI, GitHub, or Zenodo release.
   duplicate/MultiIndex labels, empty tables, and input preservation.
 
 ### Changed
+- Exporters validate the full cohort before writing, reject unsafe/duplicate
+  identities and inconsistent totals, and refuse existing output targets.
+  This intentionally tightens candidate input/file behavior; it does not prove
+  terminology conformance or clinical plausibility. See the export contract.
 - Public descriptions distinguish the local 0.3.0 candidate, published 0.2.2
   installation and preserved dataset. The assumptions ledger and site explain
   simulated outcomes, social-support proxy, geography and clinical-stage limits
